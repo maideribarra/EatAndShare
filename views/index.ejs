@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Eat\&Share</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Bootstrap styles -->
+    <!--<link href="assets/css/bootstrap.css" rel="stylesheet"/>-->
+    <!-- Customize styles -->
+    <!--<link href="style.css" rel="stylesheet"/>-->
+    <!-- font awesome styles -->
+	<!--<link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">-->
+  <script src="/js/acciones.js" type="text/javascript"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <!--<script src='../js/acciones.js' type='text/javascript'></script>-->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/prettyPhoto.css" rel="stylesheet">
+    <link href="css/price-range.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+	<link href="css/main.css" rel="stylesheet">
+	<link href="css/responsive.css" rel="stylesheet">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+
+	
+	<!-- Favicons -->
+    <link rel="shortcut icon" href="assets/ico/favicon.ico">
+   </head>
+<body>
+<!-- 
+	Upper Header Section 
+-->
+
+<!--
+Lower Header Section 
+-->
+  <section>
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <script src="/js/Navbar.js"></script>
+  </section>
+  <section>
+  </section>
+
+	<hr class="soften">
+	<div class="well well-small">
+  <div class="contact-form">
+	
+	<hr class="soften"/>	
+	<div class="row-fluid">
+		<div class="span8 relative">
+		<form action="/upload" method="POST" enctype="multipart/form-data">
+		<div class="form-group col-md-6">
+
+		<input id="imageUP" type="file" name="fileToUpload" id="fileToUpload" class="custom file">
+		</div>
+		
+    <fieldset>
+          <div class="form-group col-md-12">
+           
+              <input id="NameUp" name="NameUp" type="text" placeholder="Nombre" class="form-control"/>
+           
+          </div>
+       <div class="form-group col-md-12">
+           
+              <input id="IngredientesUp" name="IngredientesUp" type="text" placeholder="Ingredientes" class="form-control"/>
+           
+          </div>
+       <div class="form-group col-md-12">
+           
+              <input type="text"  placeholder="subject" class="form-control"/>
+          
+          </div>
+          <div class="form-group col-md-12">
+              <textarea rows="3" id="RecetaUp"name="RecetaUp" class="form-control"></textarea>
+           
+          </div>
+		  <div class="form-group col-md-12">
+		<input type="submit" value="Submit" id="submitForm" name="submit" class="btn btn-primary pull-right">
+		</div>
+     </fieldset>
+
+		</form>		
+		</div>
+		<% if(files){ %>
+          <% files.forEach(function(file) { %>
+            <div class="card card-body mb-3">
+              <% if(file.isImage) { %>
+                <img src="image/<%= file.filename %>" alt="">
+                <% } else { %>
+                  <a href = "/files/<%= file.filename %>" target = "_blank"><%= file.filename %></a>
+                    <% } %>
+                      <form method="POST" action="/files/<%= file._id %>?_method=DELETE">
+                        <button class="btn btn-danger btn-block mt-4">Delete</button>
+                      </form>
+            </div>
+            <% }) %>
+              <% } else { %>
+                <p>No files to show</p>
+                <% } %>
+
+			
+
+	
+</div>
+<!-- 
+Clients 
+-->
+
+
+<!--
+Footer
+-->
+
+</div><!-- /container -->
+
+<div>
+<a href="#" class="gotop"><i class="icon-double-angle-up"></i></a>
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/jquery.js"></script>
+	<script src="assets/js/bootstrap.min.js"></script>
+	<script src="assets/js/jquery.easing-1.3.min.js"></script>
+    <script src="assets/js/jquery.scrollTo-1.4.3.1-min.js"></script>
+    <script src="assets/js/shop.js"></script>
+  </body>
+</html>
