@@ -22,40 +22,40 @@ $(document).ready(function () {
         });
     });
 
-    $("#submitForm").click(function () {
-        var ingredientes=$("#IngredientesUp").val();
-        var nombre=$("#NameUp").val();
-        var proceso=$("#RecetaUp").val();
-        var fileName=$("#imageUP").val();
-        var reader = new FileReader();
-        // if (fileName) {
-        // // create reader
+    // $("#submitForm").click(function () {
+    //     var ingredientes=$("#IngredientesUp").val();
+    //     var nombre=$("#NameUp").val();
+    //     var proceso=$("#RecetaUp").val();
+    //     var fileName=$("#imageUP").val();
+    //     var reader = new FileReader();
+    //     // if (fileName) {
+    //     // // create reader
             
             
-        //     reader.onload = function(e) {
-        //     // browser completed reading file - display it
-        //         alert(e.target.result);
-        //     };
-        // }
-        Jimp.read(fileName, (err, file) => {
-        if (err) throw err;
-            file.resize(100, 100) // resize
-            file.write(fileName); // save
-        });
-        var formData = new FormData();
-        formData.append('imageUP', reader.readAsText(fileName), fileName);
-        formData.append('IngredientesUp',ingredientes);
-        formData.append('NameUp',nombre);
-        formData.append('RecetaUp',proceso);
-        $.ajax({
-            type: 'POST',
-            url: '/upload',
-            data: formData,
-            success: function (data) {
+    //     //     reader.onload = function(e) {
+    //     //     // browser completed reading file - display it
+    //     //         alert(e.target.result);
+    //     //     };
+    //     // }
+    //     Jimp.read(fileName, (err, file) => {
+    //     if (err) throw err;
+    //         file.resize(100, 100) // resize
+    //         file.write(fileName); // save
+    //     });
+    //     var formData = new FormData();
+    //     formData.append('imageUP', reader.readAsText(fileName), fileName);
+    //     formData.append('IngredientesUp',ingredientes);
+    //     formData.append('NameUp',nombre);
+    //     formData.append('RecetaUp',proceso);
+    //     $.ajax({
+    //         type: 'POST',
+    //         url: '/upload',
+    //         data: formData,
+    //         success: function (data) {
                 
-            }
-        });
-    });
+    //         }
+    //     });
+    // });
 
     $("#botonVoler").click(function () {
         $.ajax({

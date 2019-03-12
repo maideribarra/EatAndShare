@@ -7,13 +7,17 @@ const GridFsStorage = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
 const methodOverride = require('method-override');
 const app = express();  
+const Jimp = require('jimp');
+var FormData = require('form-data');
 // Middleware
 app.use(express.static('./public'));
 app.use(bodyParser.json());
 app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
-
-
+var fs = require('fs');
+const Resize = require('./public/js/Resize');
+var im = require('imagemagick');
+var resizeImage = require('resize-image');
 // Mongo URI
 const mongoURI = 'mongodb://localhost:27017/EASbd';
 
@@ -61,22 +65,70 @@ const storage = new GridFsStorage({
 });
 
 
-function resize(file){
-  return 
-}
 
 const UPLOAD_PATH = 'uploads';
 
-const upload = multer({ storage });
+//const upload = multer({ storage });
+const upload = multer();
 
-app.post('/upload', upload.single('fileToUpload'), (req, res) => {
+// app.post('/resize', (req, res) => {
+//    var ingredientes=req.param('IngredientesUp', null);
+//    console.log(ingredientes);
+//         var nombre=req.param('NameUp', null);
+//         var proceso=req.param('RecetaUp', null);
+//         var fileName="image";
+//         //var reader = new FileReader();
+//         // if (fileName) {
+//         // // create reader
+            
+            
+//         //     reader.onload = function(e) {
+//         //     // browser completed reading file - display it
+//         //         alert(e.target.result);
+//         //     };
+//         // }
+//         console.log(req.param('fileToUpload', null));
+//         Jimp.read(req.param('fileToUpload', null), (err, file) => {
+//         if (err) throw err;
+//             file.resize(Jimp.AUTO, 100) // resize
+//             file.write(fileName); // save
+            
+//         });
+//         var data ={'imageUP': fs.createReadStream(fileName),'IngredientesUp':req.param('IngredientesUp', null),'NameUp':req.param('NameUp', null),'RecetaUp':req.param('RecetaUp', null)};
+
+        
+//         // formData.append('imageUP', fs.createReadStream(fileName));
+//         // formData.append('IngredientesUp',req.param('IngredientesUp', null));
+//         // formData.append('NameUp',req.param('NameUp', null));
+//         // formData.append('RecetaUp',req.param('RecetaUp', null));
+//         //  $.ajax({
+//         //     type: 'POST',
+//         //     url: '/upload',
+//         //     formData: data,
+//         //     success: function (data) {
+                
+//         //     }
+//         // });
+//         res.redirect('/upload');
+//     });
+
+
+
+app.post('/upload',upload.single('fileToUpload'), (req, res) => {
+  console.log("entro");
+  //console.log(req);
+  //file = req.param('fileToUpload', null);
+   // var Imagedata = resizeImage.resize(req.file, 50, 50, resizeImage.PNG);
+    //console.log(Imagedata);
+    //upload.single(Imagedata)
+	
    var collection = conn.db.collection('recipe');
-           collection.insert({"image": id,// string
-             "Ingredientes": req.param('IngredientesUp', null),
-             "Nombre": req.param('NameUp', null),//string
-             "Proceso": req.param('RecetaUp', null) });    
+           collection.insertOne({"Image":req.file,"Ingredientes": req.body.IngredientesUp,
+             "Nombre": req.body.NameUp,//string
+             "Proceso": req.body.RecetaUp});    
     
   id= new mongoose.Types.ObjectId();
+
   res.redirect('/');
 });
 
@@ -121,22 +173,22 @@ app.get('/files/:filename', (req, res) => {
 app.get('/image/:filename', (req, res) => {
   gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
     // Check if the input is a valid image or not
-    if (!file || file.length === 0) {
-      return res.status(404).json({
-        err: 'No file exists'
-      });
-    }
+    //if (!file || file.length === 0) {
+      //return res.status(404).json({
+        //err: 'No file exists'
+      //});
+    //}
 
     // If the file exists then check whether it is an image
-    if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
+    //if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
       // Read output to browser
       const readstream = gfs.createReadStream(file.filename);
       readstream.pipe(res);
-    } else {
-      res.status(404).json({
-        err: 'Not an image'
-      });
-    }
+    //} else {
+      //res.status(404).json({
+        //err: 'Not an image'
+      
+    
   });
 });
 
