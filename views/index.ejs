@@ -34,78 +34,7 @@
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
 <title>client side image resize before upload jquery</title>
 <script type="text/javascript">
-  //var fileReader = new FileReader();
-// var filterType = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
 
-// fileReader.onload = function (event) {
-//   var image = new Image();
-//   var canvas=document.createElement("canvas");
-//   image.onload=function(){
-//       document.getElementById("fileToUpload").src=image.src;
-      
-//       var context=canvas.getContext("2d");
-//       canvas.width=image.width/4;
-//       canvas.height=image.height/4;
-//       context.drawImage(image,
-//           0,
-//           0,
-//           image.width,
-//           image.height,
-//           0,
-//           0,
-//           canvas.width,
-//           canvas.height
-//       );
-//       console.log("hokla");
-//       console.log(canvas.toDataURL());
-//       document.getElementById("upload-Preview").src = canvas.toDataURL();
-            
-//   }
-//   image.src=document.getElementById("upload-Preview").src;
-
-     // var data ={'imageUP': image.src,'IngredientesUp':document.getElementById('IngredientesUp').val,'NameUp':document.getElementById("NameUp").val,'RecetaUp':document.getElementById("RecetaUp").val};
-
-        
-     //    $.ajax({
-     //        type: "POST",
-     //        url: "/upload",
-     //        data: data,
-     //        processData: false,
-     //        contentType: false,
-     //        cache: false,
-     //        success: (data) = > {
-     //            alert("yes");
-     //        },
-     //        error: function(xhr, status, error) {
-     //            alert(xhr.responseText);
-     //        }
-     //    });
-    
-  
-  //}   //var ingredientes =$("#IngredientesUp").val();
-    // var nombre =$("#NameUp").val();
-    // var proceso =$("#RecetaUp").val();
-        
-
-
-//var loadImageFile = function () {
-  //var uploadImage = document.getElementById("fileToUpload");
-  
-  //check and retuns the length of uploded file.
-  //if (uploadImage.files.length === 0) { 
-    //return; 
-  //}
-  
-  //Is Used for validate a valid file.
-//   var uploadFile = document.getElementById("fileToUpload").files[0];
-//   if (!filterType.test(uploadFile.type)) {
-//     alert("Please select a valid image."); 
-//     return;
-//   }
-  
-//   fileReader.readAsDataURL(uploadFile);
-  
-// };
 var formData = new FormData();
 function compress(e) {
     const width = 50;
@@ -122,7 +51,6 @@ function compress(e) {
                 elem.width = width;
                 elem.height = height;
                 const ctx = elem.getContext('2d');
-                // img.width and img.height will contain the original dimensions
                 ctx.drawImage(img, 0, 0, width, height);
                 document.getElementById("upload-Preview").src = ctx.canvas.toDataURL();
                 ctx.canvas.toBlob((blob) => {
@@ -160,78 +88,54 @@ function submit(){
 </script>
    </head>
 <body>
-<!-- 
-	Upper Header Section 
--->
 
-<!--
-Lower Header Section 
--->
   <section>
     <script src="https://apis.google.com/js/platform.js"></script>
     <script src="/js/Navbar.js"></script>
   </section>
   <section>
-  </section>
+  
 
 	<hr class="soften">
-	<div class="well well-small">
-  <div class="contact-form">
-	
-	<hr class="soften"/>	
-	<div class="row-fluid">
-		<div class="span8 relative">
-		<!--<form action="/upload" method="POST" enctype="multipart/form-data">-->
-		<div class="form-group col-md-6">
-
-		<input onchange="compress(this)" type="file" name="fileToUpload" id="fileToUpload" class="custom file">
-    <img id="upload-Preview"/>
-    
-		</div>		
-    <fieldset>
-          <div class="form-group col-md-12">
-           
-              <input id="NameUp" name="NameUp" type="text" placeholder="Nombre" class="form-control"/>
-           
-          </div>
-       <div class="form-group col-md-12">
-           
-              <input id="IngredientesUp" name="IngredientesUp" type="text" placeholder="Ingredientes" class="form-control"/>
-           
-          </div>
-       <div class="form-group col-md-12">
-           
-              <input type="text"  placeholder="subject" class="form-control"/>
-          
-          </div>
-          <div class="form-group col-md-12">
-              <textarea rows="3" id="RecetaUp"name="RecetaUp" class="form-control"></textarea>
-           
-          </div>
-		  <div class="form-group col-md-12">
-		<button  onclick="submit()" id="submitForm" name="submit" class="btn btn-primary pull-right">Send</button>
-		</div>
-     </fieldset>
-
-		<!--</form>-->		
-		</div>
-		<% if(files){ %>
+	 <div class="well well-small">
+      <div class="contact-form">	
+	     <hr class="soften"/>	
+	       <div class="row-fluid">
+		      <div class="span8 relative">		
+		        <div class="form-group col-md-6">
+		          <input onchange="compress(this)" type="file" name="fileToUpload" id="fileToUpload" class="custom file">
+              <img id="upload-Preview"/>    
+		        </div>		
+            <fieldset>
+              <div class="form-group col-md-12">           
+                <input id="NameUp" name="NameUp" type="text" placeholder="Nombre" class="form-control"/>           
+              </div>
+              <div class="form-group col-md-12">           
+                <input id="IngredientesUp" name="IngredientesUp" type="text" placeholder="Ingredientes" class="form-control"/>          
+              </div>
+              <div class="form-group col-md-12">           
+                <input type="text"  placeholder="subject" class="form-control"/>          
+              </div>
+              <div class="form-group col-md-12">
+                <textarea rows="3" id="RecetaUp"name="RecetaUp" class="form-control"></textarea>           
+              </div>
+		          <div class="form-group col-md-12">
+		            <button  onclick="submit()" id="submitForm" name="submit" class="btn btn-primary pull-right">Send</button>
+		          </div>
+            </fieldset>			
+		      </div>
+		      
           <% files.forEach(function(file) { %>
-            <div class="card card-body mb-3">
-              <% if(file.isImage) { %>
-                <img src="image/<%= file.filename %>" alt="">
-                <% } else { %>
-                  <a href = "/files/<%= file.filename %>" target = "_blank"><%= file.filename %></a>
-                    <% } %>
-                      <form method="POST" action="/files/<%= file._id %>?_method=DELETE">
-                        <button class="btn btn-danger btn-block mt-4">Delete</button>
-                      </form>
+              <div class="card card-body mb-3">
+                 
+                  <% var Base64  = new Buffer(file.Image.buffer.buffer).toString('base64'); %>      			   
+				        <img src=<%='data:image/png;base64,'+Base64 %> alt="picture">
+                
+               
             </div>
-            <% }) %>
-              <% } else { %>
-                <p>No files to show</p>
-                <% } %>
-
+           <% }) %>
+             
+               
 			
 
 	
@@ -246,7 +150,7 @@ Footer
 -->
 
 </div><!-- /container -->
-
+</section>
 <div>
 <a href="#" class="gotop"><i class="icon-double-angle-up"></i></a>
     <!-- Placed at the end of the document so the pages load faster -->
