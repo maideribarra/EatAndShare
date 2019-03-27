@@ -6,15 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+	<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <!-- Bootstrap styles -->
     <!--<link href="assets/css/bootstrap.css" rel="stylesheet"/>-->
     <!-- Customize styles -->
     <!--<link href="style.css" rel="stylesheet"/>-->
     <!-- font awesome styles -->
 	<!--<link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">-->
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-    <!--<script src='../js/acciones.js' type='text/javascript'></script>-->
+	<!--<script src="http://code.jquery.com/jquery-1.11.1.min.js">-->  
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/prettyPhoto.css" rel="stylesheet">
@@ -32,17 +33,96 @@
     <link rel="shortcut icon" href="assets/ico/favicon.ico">
     <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
-<title>client side image resize before upload jquery</title>
+<title>client</title>
+<?php
+
+
+
+?>
 <script type="text/javascript">
 
+$(document).ready(function(){
+
+//    jQuery.ajax({
+//     type: "POST",
+//     url: 'http://localhost:5000/ajax/bedcawrapper.php',
+//     data: {functionname: 'add'},
+
+//     success: function (obj, textstatus) {
+//                    console.log(obj);
+                  
+//             }
+// });
+//     jQuery.ajax({
+//     type: "POST",
+//     url: 'http://www.bedca.net/bdpub/procquery.php',
+//     contentType: "text/xml",
+//     data: "<?xml version=\"1.0\" encoding=\"utf-8\"?>    <foodquery>      <type level=\"3\"/>      <selection>        <atribute name=\"fg_id\"/>        <atribute name=\"fg_ori_name\"/>        <atribute name=\"fg_eng_name\"/>      </selection>      <order ordtype=\"ASC\">        <atribute3 name=\"fg_id\"/>      </order>    </foodquery>",
+
+//     success: function (obj, textstatus) {
+//                    console.log(obj);
+                  
+//             },
+//     error : function (xhr, ajaxOptions, thrownError){  
+//         console.log(xhr.status);          
+//         console.log(thrownError);
+//     } 
+// });
+  });
+  
+
+
+
 var formData = new FormData();
+function compVision(image) {
+        console.log(image);
+        var params = {
+            // Request parameters
+            "visualFeatures": "Categories,Adult,Description",
+            "language": "es",
+        };
+      
+        jQuery.ajax({
+            url: "https://northeurope.api.cognitive.microsoft.com/vision/v2.0/analyze?" + $.param(params),
+            headers: {
+              'Origin':'http://lvh.me:5000',
+              'Access-Control-Allow-Credentials':'true',
+              'Content-Type': 'application/octet-stream',
+              "Access-Control-Allow-Origin":"*",
+              "Ocp-Apim-Subscription-Key":"6e4d627095ec456b83752c664150eacf"
+
+
+    },
+            type: "POST",
+            processData:false,
+            crossDomain: true,
+            dataType: 'json',
+            // Request body
+            data: image
+        })
+        .done(function(data) {
+            alert("success");
+            console.log(data);
+            document.getElementById("NameUp").value = data['categories'][0]['name'].toString();
+            document.getElementById("desc").value = data['description']['captions'][0]['text'].toString();
+            document.getElementById("RecetaUp").value = data['description']['tags'].toString();
+            //console.log(data);
+        })
+        .fail(function() {
+           
+            alert("error");
+            
+        });
+    };
+
 function compress(e) {
-    const width = 50;
-    const height = 50;
+    const width = 400;
+    const height = 400;
    const fileName = e.files[0].name;
    console.log(fileName);
     const reader = new FileReader();
     reader.readAsDataURL(e.files[0]);
+    var image;
     reader.onload = event => {
         const img = new Image();
         img.src = event.target.result;
@@ -53,27 +133,41 @@ function compress(e) {
                 const ctx = elem.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
                 document.getElementById("upload-Preview").src = ctx.canvas.toDataURL();
+                
+                
                 ctx.canvas.toBlob((blob) => {
                     const file = new File([blob], fileName, {
                         type: 'image/jpeg',
                         lastModified: Date.now()
                     });
+                    //console.log(file);
+                    var data = ctx.canvas.toDataURL("image/JPEG");
+                    var b= new Blob([blob], { type: 'contentType' });
+                    
+                    console.log("salgo compVision");
                     console.log("anyado al form");
                     formData.append('fileToUpload',file);
+                    var body =[];
+                    body.push(data);
+                    compVision(b);
                     console.log("anyadido al form");
+                    
                 }, 'image/jpeg', 1);
 
                 
             },
             reader.onerror = error => console.log(error);
     };
+     console.log(e.files[0].buffer);
+    
 }
+
 function submit(){
-  formData.append('IngredientesUp',document.getElementById('IngredientesUp').value);
+  formData.append('IngredientesUp',document.getElementById('fileToUpload').value);
   console.log(document.getElementById('IngredientesUp').value);
   formData.append('NameUp',document.getElementById("NameUp").value);
   console.log("anyado nombre");
-  formData.append('RecetaUp',document.getElementById("RecetaUp").val);
+  formData.append('RecetaUp',document.getElementById("RecetaUp").value);
   jQuery.ajax({
      url: '/upload',
      type: 'POST',     
@@ -84,6 +178,7 @@ function submit(){
       console.log("enviado");          
      }
  });
+  
 }
 </script>
    </head>
@@ -114,16 +209,17 @@ function submit(){
                 <input id="IngredientesUp" name="IngredientesUp" type="text" placeholder="Ingredientes" class="form-control"/>          
               </div>
               <div class="form-group col-md-12">           
-                <input type="text"  placeholder="subject" class="form-control"/>          
+                <input id="desc" type="text"  placeholder="description" class="form-control"/>          
               </div>
               <div class="form-group col-md-12">
-                <textarea rows="3" id="RecetaUp"name="RecetaUp" class="form-control"></textarea>           
+                <input rows="3" id="RecetaUp"name="RecetaUp" class="form-control"/>           
               </div>
 		          <div class="form-group col-md-12">
 		            <button  onclick="submit()" id="submitForm" name="submit" class="btn btn-primary pull-right">Send</button>
 		          </div>
             </fieldset>			
 		      </div>
+          <% if(files){ %>
 		      
           <% files.forEach(function(file) { %>
               <div class="card card-body mb-3">
@@ -133,7 +229,7 @@ function submit(){
                 
                
             </div>
-           <% }) %>
+           <% })} %>
              
                
 			

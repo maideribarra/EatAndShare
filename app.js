@@ -8,7 +8,10 @@ const Grid = require('gridfs-stream');
 const methodOverride = require('method-override');
 const app = express();  
 const Jimp = require('jimp');
+//var jQuery = require('jQuery');
 var FormData = require('form-data');
+var http = require('http').Server(app);
+
 // Middleware
 app.use(express.static('./public'));
 app.use(bodyParser.json());
@@ -17,6 +20,8 @@ app.set('view engine', 'ejs');
 var fs = require('fs');
 const Resize = require('./public/js/Resize');
 var im = require('imagemagick');
+var cors = require('cors');
+//app.use(require('express-ajax'));
 var resizeImage = require('resize-image');
 // Mongo URI
 const mongoURI = 'mongodb://localhost:27017/EASbd';
@@ -37,12 +42,60 @@ const UPLOAD_PATH = 'uploads';
 
 const upload = multer();
 
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+// function compVision(image) {
+        
+//         var params = {
+//             // Request parameters
+//             "visualFeatures": "Categories,Tags,Description,Adult",
+//             "details": "{string}",
+//             "language": "en",
+//         };
+      
+//         $.ajax({
+//             url: "https://northeurope.api.cognitive.microsoft.com/vision/v1.0/analyze?" + $.param(params),
+//             beforeSend: function(xhrObj){
+//                 // Request headers
+//                 xhrObj.setRequestHeader("Content-Type","application/octet-stream");
+//                 xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key","{6e4d627095ec456b83752c664150eacf}");
+//             },
+//             type: "POST",
+//             // Request body
+//             data: image,
+//             processData:false,
+//             contentType: 'application/octet-stream'
+//         })
+//         .done(function(data) {
+//             alert("success");
+//             console.log(data);
+//         })
+//         .fail(function() {
+//             alert("error");
+            
+//         });
+//     };
+
+    
+  
+        
+       
+    
+
 app.post('/upload',upload.single('fileToUpload'), (req, res) => {
   console.log("entro");
    var collection = conn.db.collection('recipe');
            collection.insertOne({"Image":req.file,"Ingredientes": req.body.IngredientesUp,
              "Nombre": req.body.NameUp,//string
              "Proceso": req.body.RecetaUp});
+  //var Base64  = new Buffer(req.file.buffer);
+ // console.log(Base64);
+  //compVision(Base64);
   res.redirect('/');
 });
 
@@ -50,6 +103,21 @@ app.get('/', (req, res) => {
   var collection = conn.db.collection('recipe');
   collection.find().toArray((err, items) => {
     console.log(items.length);
+//     $.ajax({
+//     type: "POST",
+//     url: 'http://www.bedca.net/bdpub/procquery.php',
+//     contentType: "text/xml",
+//     data: "<?xml version=\"1.0\" encoding=\"utf-8\"?>    <foodquery>      <type level=\"3\"/>      <selection>        <atribute name=\"fg_id\"/>        <atribute name=\"fg_ori_name\"/>        <atribute name=\"fg_eng_name\"/>      </selection>      <order ordtype=\"ASC\">        <atribute3 name=\"fg_id\"/>      </order>    </foodquery>",
+
+//     success: function (obj, textstatus) {
+//                    console.log(obj);
+                  
+//             },
+//     error : function (xhr, ajaxOptions, thrownError){  
+//         console.log(xhr.status);          
+//         console.log(thrownError);
+//     } 
+// });
     //console.log(items);
      if (items.length === 0) {
       res.render('index', { files: false });
