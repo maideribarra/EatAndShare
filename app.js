@@ -8,10 +8,11 @@ const Grid = require('gridfs-stream');
 const methodOverride = require('method-override');
 const app = express();  
 const Jimp = require('jimp');
+const cheerio = require('cheerio');
 //var jQuery = require('jQuery');
 var FormData = require('form-data');
 var http = require('http').Server(app);
-
+var request = require('request');
 // Middleware
 app.use(express.static('./public'));
 app.use(bodyParser.json());
@@ -28,6 +29,7 @@ const mongoURI = 'mongodb://localhost:27017/EASbd';
 
 // Create mongo connection
 const conn = mongoose.createConnection(mongoURI);
+
 
 // Init gfs
 let gfs;
@@ -81,7 +83,8 @@ app.use(function(req, res, next) {
 //         });
 //     };
 
-    
+ 
+// POST data then scrape the page
   
         
        
@@ -99,10 +102,165 @@ app.post('/upload',upload.single('fileToUpload'), (req, res) => {
   res.redirect('/');
 });
 
+app.get('/food', function (req, res) {
+      var collection = conn.db.collection('food');        
+          console.log("imprimo comida");        
+          collection.find({},{ projection: {_id:0, nameSP:1}}
+).toArray( function (err, food) {
+            if (err) throw err;
+            console.log({array:food});
+            res.render('index', { array:food });  
+          });  
+
+  });
+
+
+// app.get('/bedca', (req, res) => {
+//  console.log("bedca");
+//  const { remote } = require('webdriverio');
+ 
+//  (async () => {
+//     const browser = await remote({
+//         logLevel: 'error',
+//         path: '/',
+//         capabilities: {
+//             browserName: 'firefox'
+//         }
+//     });
+
+//     await browser.url('http://www.bedca.net/bdpub/index.php');
+//     //const nav= browser.$$('#navigation');
+//     browser.$$('#navigation div:nth-child(4) a').then((value) => {
+//       console.log(value);
+//       value.forEach((link) => {
+//         link.click();
+//     });
+
+//     });
+//     browser.$('#Alfabetica').then((value) => {
+//         console.log(value);      
+//         value.click();
+  
+//     });
+//      browser.$('#content #alphabet p a').then((value) => {
+//       value.click();
+//       setTimeout(function() {
+
+//       browser.$$('#content2 table').then((value) => {
+//         console.log("entro");         
+        
+//           value[1].getHTML(false).then((datos)=>{
+        
+//         console.log(datos);
+//         //const convert = require('html-to-json-data');
+//         //const html=datos;
+//         //console.log(convert.group('tr', text('a')));
+        
+    
+      
+
+//       });
+//     });
+//       }, 3000);
+//     });
+      
+
+
+        
+  
+    
+   
+    // nav.then(function(result) {
+      // result.click();
+//      console.log(nav[0]);
+//      nav['Promise'][0].click();
+//     //const link = result.$$('div')[3].$('a');
+//     //console.log(link.getText());
+//     //link.click();
+     
+//     //const listaAlfa =browser.$('#Alfabetica');
+//     //listaAlfa.click();
+//     //var tabla = browser.$('#content').getHTML();
+//     //console.log(tabla);
+    
+   
+//})
+    
+
+    
+
+    //await browser.deleteSession();
+//})().catch((e) => console.error(e));
+ /*var options = { desiredCapabilities: { browserName: 'chrome' } }; 
+ var driver = wd.remote({ capabilities: { browserName: 'chrome' } });
+ driver.init();
+ driver.url("http://www.bedca.net/bdpub/index_en.php");
+ driver.getHTML('body', false, function(err, html) {
+        if (err) {
+          throw new Error(err);
+        }
+
+        this.end();
+        console.log(cheerio.load(html));
+      });
+ */// families = driver.find_element_by_xpath("//*[@id='fglist']");
+ // families_select = families.get_attribute('innerHTML');
+ // console.log(families);
+
+// req = request.defaults({
+//   jar: true,                 // save cookies to jar
+//   rejectUnauthorized: false, 
+//   followAllRedirects: true   // allow redirections
+// });
+
+//   req.post({
+//     url: "http://www.bedca.net/bdpub/procquery.php",
+//     headers: {
+//         'Content-Type': "text/xml" // optional headers
+//      },
+//      //data: "<?xml version=\"1.0\" encoding=\"utf-8\"?>    <foodquery>      <type level=\"3\"/>      <selection>        <atribute name=\"fg_id\"/>        <atribute name=\"fg_ori_name\"/>        <atribute name=\"fg_eng_name\"/>      </selection>      <order ordtype=\"ASC\">        <atribute3 name=\"fg_id\"/>      </order>    </foodquery>"
+//   }, function(err, resp, file) {
+  
+//   // load the html into cheerio
+//   var $ = cheerio.load(file, { xmlMode: true });
+//   console.log($.html());
+  
+//   // do something with the page here
+  
+// });   
+
+  // $.ajax({ url: 'ajax/bedca.php', success: function(data) { alert('Directory created'); } });
+  // //var Base64  = new Buffer(req.file.buffer);
+ // console.log(Base64);
+  //compVision(Base64);
+//   $.ajax({
+//     url: 'http://www.bedca.net/bdpub/procquery.php',
+//     headers: {
+//               'contentType': "text/xml",
+
+//     },
+//     type: "GET",
+//     data: "<?xml version=\"1.0\" encoding=\"utf-8\"?>    <foodquery>      <type level=\"3\"/>      <selection>        <atribute name=\"fg_id\"/>        <atribute name=\"fg_ori_name\"/>        <atribute name=\"fg_eng_name\"/>      </selection>      <order ordtype=\"ASC\">        <atribute3 name=\"fg_id\"/>      </order>    </foodquery>",
+
+
+//     success: function (obj, textstatus) {
+//                    console.log(obj);
+                  
+//             },
+//     error : function (xhr, ajaxOptions, thrownError){  
+//         console.log(xhr.status);          
+//         console.log(thrownError);
+//     } 
+// });
+//});
+
+
 app.get('/', (req, res) => {
   var collection = conn.db.collection('recipe');
+  var photos;
   collection.find().toArray((err, items) => {
     console.log(items.length);
+    photos=items;
 //     $.ajax({
 //     type: "POST",
 //     url: 'http://www.bedca.net/bdpub/procquery.php',
@@ -123,9 +281,22 @@ app.get('/', (req, res) => {
       res.render('index', { files: false });
     } else {
       console.log(items[1]);
-       res.render('index', { files: items });     
+          
   }
   });
+  var collection = conn.db.collection('food');        
+          console.log("imprimo comida");       
+          
+          collection.find({},{ projection: {_id:0, nameSP:1}}
+).toArray( function (err, food) {
+            var valores=[];
+            for (x=0;x<food.length;x++){
+              valores.push(Object.values(food[x])[0]);
+            }
+            if (err) throw err;
+            console.log({array:valores});
+            res.render('index', { array:valores, files: photos });  
+          }); 
     //Check if files
     
     
