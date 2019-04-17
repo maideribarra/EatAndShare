@@ -2525,3 +2525,6 @@ h2.title {
 .inpMedidas {
   display: none;
 }
+.hastag p{
+  font-size:0.85px !important;
+}

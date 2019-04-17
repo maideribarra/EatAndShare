@@ -6,14 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-	  <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <!-- Bootstrap styles -->
-    <!--<link href="assets/css/bootstrap.css" rel="stylesheet"/>-->
-    <!-- Customize styles -->
-    <!--<link href="style.css" rel="stylesheet"/>-->
-    <!-- font awesome styles -->
-	<!--<link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">-->
-	<!--<script src="http://code.jquery.com/jquery-1.11.1.min.js">-->  
+	  <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>    
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/font-awesome.min.css" rel="stylesheet">
@@ -25,6 +18,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="corazon" sizes="72x72" href="images/corazon.png">
     <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
     <script src='https://cdn.rawgit.com/pguso/jquery-plugin-circliful/master/js/jquery.circliful.min.js'></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -45,176 +39,18 @@
  
 
 $(document).ready(function(){
-  document.getElementById("cantCalorias").value=0;
-
+  
     
     
 
   });
-
-var formIngredientes = new FormData();
-function ingredientToList() {
-  var li = document.createElement("li");
-  var conc2 = document.getElementById("IngredientesUp").value.concat(" - ");
-  var conc3 = conc2.concat( document.getElementById("cantIng").value);
-  var conc4 = conc3.concat(" - ");
-  var conc5 = conc4.concat( document.getElementById("cantidad").value);
-  var text = document.createTextNode(conc5);  
-  li.appendChild(text);
-  li.setAttribute("class", "list-group-item");   
-  document.getElementById("listaIngred").appendChild(li);
-  var conc6 = conc5.concat("%");
-  var listaHide = document.getElementById("IngCantList").value;
-  var textValorAnyadido = listaHide.concat(conc6);
-  console.log(textValorAnyadido);
-  document.getElementById("IngCantList").value=textValorAnyadido;
-  var formIngredientes = new FormData();
-  formIngredientes.append('ingredientes',document.getElementById('IngredientesUp').value);
-  formIngredientes.append('cantidad',document.getElementById('cantIng').value);
-  formIngredientes.append('tipo',document.getElementById('cantidad').value);
-  console.log(document.getElementById('IngredientesUp').value);
-//console.log(textValorAnyadido);
-//
-  console.log(document.getElementById('cantIng').value);
-//console.log(textValorAnyadido);
-//
-  console.log(document.getElementById('cantidad').value);
-//})
-  jQuery.ajax({
-     url: '/getCalorias',
-     type: 'POST', 
-     contentType: false,
-     processData: false,    
-     data:formIngredientes,
-     success: function () {  
-      console.log("enviado");          
-     }
- }).done(function(data) {
-            alert("success");
-            console.log(data);
-            var calorias=document.getElementById("cantCalorias").value;
-            document.getElementById("cantCalorias").value= parseFloat(data['array'])+parseFloat(calorias);
-           
-            //console.log(data);
-        })
-        .fail(function() {
-            
-            alert("error");
-            
-        });
-}
-  
-function addnIngredient() {
-  // $.get( "/food", function() {
-  //alert( "succes" );
-  var food=Object.values(JSON.parse(document.getElementById("imaginario").innerHTML));
-  console.log(food);
-//})
-  
-    $( "#IngredientesUp" ).autocomplete({
-      source: food
-    });
-  
-}
-
-var formData = new FormData();
-function compVision(image) {
-        console.log(image);
-        var params = {
-            // Request parameters
-            "visualFeatures": "Categories,Adult,Description",
-            "language": "es",
-        };
-      
-        jQuery.ajax({
-            url: "https://northeurope.api.cognitive.microsoft.com/vision/v2.0/analyze?" + $.param(params),
-            headers: {
-              'Origin':'http://lvh.me:5000',
-              'Access-Control-Allow-Credentials':'true',
-              'Content-Type': 'application/octet-stream',
-              "Access-Control-Allow-Origin":"*",
-              "Ocp-Apim-Subscription-Key":"6e4d627095ec456b83752c664150eacf"
-
-
-    },
-            type: "POST",
-            processData:false,
-            crossDomain: true,
-            dataType: 'json',
-            // Request body
-            data: image
-        })
-        .done(function(data) {
-            alert("success");
-            console.log(data);
-            document.getElementById("NameUp").value = data['categories'][0]['name'].toString();
-            document.getElementById("desc").value = data['description']['captions'][0]['text'].toString();
-            document.getElementById("RecetaUp").value = data['description']['tags'].toString();
-            //console.log(data);
-        })
-        .fail(function() {
-           
-            alert("error");
-            
-        });
-    };
-
-function compress(e) {
-    const width = 400;
-    const height = 400;
-   const fileName = e.files[0].name;
-   console.log(fileName);
-    const reader = new FileReader();
-    reader.readAsDataURL(e.files[0]);
-    var image;
-    reader.onload = event => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onload = () => {
-                const elem = document.createElement('canvas');
-                elem.width = width;
-                elem.height = height;
-                const ctx = elem.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                document.getElementById("upload-Preview").src = ctx.canvas.toDataURL();
-                
-                
-                ctx.canvas.toBlob((blob) => {
-                    const file = new File([blob], fileName, {
-                        type: 'image/jpeg',
-                        lastModified: Date.now()
-                    });
-                    //console.log(file);
-                    var data = ctx.canvas.toDataURL("image/JPEG");
-                    var b= new Blob([blob], { type: 'contentType' });
-                    
-                    console.log("salgo compVision");
-                    console.log("anyado al form");
-                    formData.append('fileToUpload',file);
-                    var body =[];
-                    body.push(data);
-                    compVision(b);
-                    console.log("anyadido al form");
-                    
-                }, 'image/jpeg', 1);
-
-                
-            },
-            reader.onerror = error => console.log(error);
-    };
-     console.log(e.files[0].buffer);
-    
-}
-
-function submit(){
+function addLike(id){
+  var formData = new FormData();
+  console.log(id);
   formData.append('Usuario',document.getElementById('Usuario').value);  
-  formData.append('NameUp',document.getElementById("NameUp").value);
-  formData.append('RecetaUp',document.getElementById("ObjectsUp").value);
-  formData.append('TagsUp',document.getElementById("TagsUp").value);
-  formData.append('Descripcion',document.getElementById("desc").value);
-  formData.append('ListaIngredientes',document.getElementById("IngCantList").value);
+  formData.append('RecetaId',id);
   jQuery.ajax({
-     url: '/upload',
+     url: '/addLike',
      type: 'POST',     
      contentType: false,
      processData: false,
@@ -225,6 +61,8 @@ function submit(){
  });
   
 }
+
+
 </script>
    </head>
 <body>
@@ -234,90 +72,345 @@ function submit(){
     <script src="/js/Navbar.js"></script>
   </section>
   <section>
-	<hr class="soften">
-	 <div class="well well-small">
-      <div class="contact-form">	
-	     <hr class="soften"/>	
-	       <div class="row-fluid">
-		      <div class="span8 relative">		
-		        <div class="form-group col-md-6">
-		          <input onchange="compress(this)" type="file" name="fileToUpload" id="fileToUpload" class="custom-file-input">
-              <img id="upload-Preview"/>    
-		        </div>		
-            <fieldset>
-              <div class="form-group col-md-12">           
-                <input id="NameUp" name="NameUp" type="text" placeholder="Nombre" class="form-control"/>           
-              </div>
-              <div class="form-group col-md-12">           
-                <input id="desc" type="text" name="DescripcionUp" placeholder="description" class="form-control"/>          
-              </div>
-              <div class="form-group col-md-12">
-                <input rows="3" id="TagsUp" placeholder="tags" name="TagsUp" class="form-control"/>           
-              </div>
-              <div class="form-group col-md-12">
-                <input rows="3" id="ObjectsUp"name="ObjectsUp" class="form-control"/>           
-              </div>     
-              <div class="span8 relative">         
-                <div class="form-group col-sm-7 auto-widget"> 
-                  <input id="IngredientesUp" name="IngredienteUp" type="text" placeholder="Ingredientes" class="form-control" onclick="addnIngredient()"/>          
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-3">
+        </div>
+        
+        <div class="col-sm-9 padding-right">
+              
+          <div class="category-tab"><!--category-tab-->
+              
+            <div class="recommended_items"><!--recommended_items-->
+              <h2 class="title text-center">Recetas</h2>
+              
+              <div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                  <div class="item active"> 
+                  <% if(items){ %>          
+                    <% items.forEach(function(item) { %>
+                    <div class="col-sm-4">
+                      <div class="product-image-wrapper">
+                        <div class="single-products">
+                          <div class="productinfo text-center">
+                            <% if(item.Image!=null){ %>
+                            <% var Base64  = new Buffer(item.Image.buffer.buffer).toString('base64'); %>               
+                            <img src=<%='data:image/png;base64,'+Base64 %> alt="picture">
+                            <h2><%=item.Nombre%></h2>
+                            <p><%=item.Descripcion%></p>
+                            <% var tags=item.Tags.split(',')%>
+                             <% var tagsHastag=tags.join('# ')%>
+                             <div class="hastag">
+                              <p><%=tagsHastag%></p>
+                             </div>                             
+                             <div>
+                                <div  class="hide">
+                                  <p id="idReceta"><%=item._id%></p>                                        
+                                </div>
+                                <a href="#" class="btn btn-default add-to-cart" onclick="addLike('<%=item._id%>')" ><i class="fa fa-shopping-cart"></i><%=item.Usuario%></a>
+                             </div>
+                          </div>
+                          
+                          
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              <% } %>
+             <% })} %>                           
                 </div>
-                                            
-                <div class="form-group col-sm-2">
-                  <div class="dropdown">
-                    <select class="form-control" id="cantidad">
-                      <option role="presentation">C</option>
-                      <option role="presentation">V</option>
-                      <option role="presentation">g</option>
-                      <option role="presentation">l</option>
-                    </select>
+                 <a class="left recommended-item-control" href="#recommended-item-carousel" data-slide="prev">
+                  <i class="fa fa-angle-left"></i>
+                  </a>
+                  <a class="right recommended-item-control" href="#recommended-item-carousel" data-slide="next">
+                  <i class="fa fa-angle-right"></i>
+                  </a>      
+              </div>
+            </div><!--/recommended_items-->
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+ <section>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-3">
+        </div>
+        
+        <div class="col-sm-9 padding-right">
+            
+          <div class="category-tab"><!--category-tab-->
+            
+          <div class="recommended_items"><!--recommended_items-->
+            <h2 class="title text-center">recommended items</h2>
+            
+            <div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
+              <div class="carousel-inner">
+                <div class="item active"> 
+                  <div class="col-sm-4">
+                    <div class="product-image-wrapper">
+                      <div class="single-products">
+                        <div class="productinfo text-center">
+                          <img src="images/home/recommend1.jpg" alt="" />
+                          <h2>$56</h2>
+                          <p>Easy Polo Black Edition</p>
+                          <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="product-image-wrapper">
+                      <div class="single-products">
+                        <div class="productinfo text-center">
+                          <img src="images/home/recommend2.jpg" alt="" />
+                          <h2>$56</h2>
+                          <p>Easy Polo Black Edition</p>
+                          <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="product-image-wrapper">
+                      <div class="single-products">
+                        <div class="productinfo text-center">
+                          <img src="images/home/recommend3.jpg" alt="" />
+                          <h2>$56</h2>
+                          <p>Easy Polo Black Edition</p>
+                          <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                        </div>
+                        
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="form-group col-sm-2"> 
-                  <input id="cantIng" name="Cantidad" type="number" placeholder="Ingredientes" class="form-control" step=".01"/>        
-                </div>
-                 <div class="form-group col-sm-1"> 
-                  <button id="Bingred"  type="text" placeholder="Ingredientes" onclick="ingredientToList()" class="btn btn-group"> + </button>        
+                <div class="item">  
+                  <div class="col-sm-4">
+                    <div class="product-image-wrapper">
+                      <div class="single-products">
+                        <div class="productinfo text-center">
+                          <img src="images/home/recommend1.jpg" alt="" />
+                          <h2>$56</h2>
+                          <p>Easy Polo Black Edition</p>
+                          <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="product-image-wrapper">
+                      <div class="single-products">
+                        <div class="productinfo text-center">
+                          <img src="images/home/recommend2.jpg" alt="" />
+                          <h2>$56</h2>
+                          <p>Easy Polo Black Edition</p>
+                          <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="product-image-wrapper">
+                      <div class="single-products">
+                        <div class="productinfo text-center">
+                          <img src="images/home/recommend3.jpg" alt="" />
+                          <h2>$56</h2>
+                          <p>Easy Polo Black Edition</p>
+                          <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="span8 relative">
-                <div class="form-group col-sm-4"> 
-                  <ul class="list-group"  id="listaIngred">
-                  </ul>
-                </div>
-                <div class="form-group col-sm-2"> 
-                  <input id="cantCalorias" name="Calorias" type="number" placeholder="Ingredientes" class="form-control" step=".01" readonly/>       
-                </div>
-              <div  class="inpMedidas hide">
-                  <input id="IngCantList" name="ListaIngredientesUp" type="text" placeholder="Ingredientes"/>          
-              </div> 
-              <div  class="inpUsuario hide">
-                  <input id="Usuario" name="usuario" type="text" placeholder="Ingredientes"/>          
-              </div> 
-		          <div class="form-group col-md-12">
-		            <button  onclick="submit()" id="submitForm" name="submit" class="btn btn-primary pull-right">Send</button>
-		          </div>
-                       
+               <a class="left recommended-item-control" href="#recommended-item-carousel" data-slide="prev">
+                <i class="fa fa-angle-left"></i>
+                </a>
+                <a class="right recommended-item-control" href="#recommended-item-carousel" data-slide="next">
+                <i class="fa fa-angle-right"></i>
+                </a>      
+            </div>
+          </div><!--/recommended_items-->
+          
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <footer id="footer"><!--Footer-->
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-2">
+            <div class="companyinfo">
+              <h2><span>e</span>-shopper</h2>
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit,sed do eiusmod tempor</p>
+            </div>
+          </div>
+          <div class="col-sm-7">
+            <div class="col-sm-3">
+              <div class="video-gallery text-center">
+                <a href="#">
+                  <div class="iframe-img">
+                    <img src="images/home/iframe1.png" alt="" />
+                  </div>
+                  <div class="overlay-icon">
+                    <i class="fa fa-play-circle-o"></i>
+                  </div>
+                </a>
+                <p>Circle of Hands</p>
+                <h2>24 DEC 2014</h2>
               </div>
-            </fieldset>			
-		      </div>
-         
-           <div id="imaginario" class="hide"><%= JSON.stringify(array)%></div>
-	
-</div>
-<!-- 
-Clients 
--->
+            </div>
+            
+            <div class="col-sm-3">
+              <div class="video-gallery text-center">
+                <a href="#">
+                  <div class="iframe-img">
+                    <img src="images/home/iframe2.png" alt="" />
+                  </div>
+                  <div class="overlay-icon">
+                    <i class="fa fa-play-circle-o"></i>
+                  </div>
+                </a>
+                <p>Circle of Hands</p>
+                <h2>24 DEC 2014</h2>
+              </div>
+            </div>
+            
+            <div class="col-sm-3">
+              <div class="video-gallery text-center">
+                <a href="#">
+                  <div class="iframe-img">
+                    <img src="images/home/iframe3.png" alt="" />
+                  </div>
+                  <div class="overlay-icon">
+                    <i class="fa fa-play-circle-o"></i>
+                  </div>
+                </a>
+                <p>Circle of Hands</p>
+                <h2>24 DEC 2014</h2>
+              </div>
+            </div>
+            
+            <div class="col-sm-3">
+              <div class="video-gallery text-center">
+                <a href="#">
+                  <div class="iframe-img">
+                    <img src="images/home/iframe4.png" alt="" />
+                  </div>
+                  <div class="overlay-icon">
+                    <i class="fa fa-play-circle-o"></i>
+                  </div>
+                </a>
+                <p>Circle of Hands</p>
+                <h2>24 DEC 2014</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="address">
+              <img src="images/home/map.png" alt="" />
+              <p>505 S Atlantic Ave Virginia Beach, VA(Virginia)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-widget">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-2">
+            <div class="single-widget">
+              <h2>Service</h2>
+              <ul class="nav nav-pills nav-stacked">
+                <li><a href="#">Online Help</a></li>
+                <li><a href="#">Contact Us</a></li>
+                <li><a href="#">Order Status</a></li>
+                <li><a href="#">Change Location</a></li>
+                <li><a href="#">FAQ’s</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <div class="single-widget">
+              <h2>Quock Shop</h2>
+              <ul class="nav nav-pills nav-stacked">
+                <li><a href="#">T-Shirt</a></li>
+                <li><a href="#">Mens</a></li>
+                <li><a href="#">Womens</a></li>
+                <li><a href="#">Gift Cards</a></li>
+                <li><a href="#">Shoes</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <div class="single-widget">
+              <h2>Policies</h2>
+              <ul class="nav nav-pills nav-stacked">
+                <li><a href="#">Terms of Use</a></li>
+                <li><a href="#">Privecy Policy</a></li>
+                <li><a href="#">Refund Policy</a></li>
+                <li><a href="#">Billing System</a></li>
+                <li><a href="#">Ticket System</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <div class="single-widget">
+              <h2>About Shopper</h2>
+              <ul class="nav nav-pills nav-stacked">
+                <li><a href="#">Company Information</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Store Location</a></li>
+                <li><a href="#">Affillate Program</a></li>
+                <li><a href="#">Copyright</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-sm-3 col-sm-offset-1">
+            <div class="single-widget">
+              <h2>About Shopper</h2>
+              <form action="#" class="searchform">
+                <input type="text" placeholder="Your email address" />
+                <!--<button type="submit" class="btn btn-default"><i class="fa fa-arrow-circle-o-right"></i></button>
+                <p>Get the most recent updates from <br />our site and be updated your self...</p>
+              </form>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="row">
+          <p class="pull-left">Copyright © 2013 E-SHOPPER Inc. All rights reserved.</p>
+          <p class="pull-right">Designed by <span><a target="_blank" href="http://www.themeum.com">Themeum</a></span></p>
+        </div>
+      </div>
+    </div>
+    
+  </footer><!--/Footer-->
+  
 
-
-<!--
-Footer
--->
-
-</div><!-- /container -->
-</section>
-<div>
-<a href="#" class="gotop"><i class="icon-double-angle-up"></i></a>
-    <!-- Placed at the end of the document so the pages load faster -->  
-   
-  </body>
+  
+  <!--  <script src="js/jquery.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.scrollUp.min.js"></script>
+  <script src="js/price-range.js"></script>
+    <script src="js/jquery.prettyPhoto.js"></script>
+    <script src="js/main.js"></script>-->
+</body>
 </html>

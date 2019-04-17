@@ -60,6 +60,9 @@ document.write("<header id=\"header\">");
         
       document.write("</div>");
     document.write("</div>");
+    document.write("<div  class=\"inpUsuario hide\">");
+    document.write("<input id=\"Usuario\" name=\"usuario\" type=\"text\" placeholder=\"Ingredientes\"/>");          
+    document.write("</div>"); 
   document.write("</header>");
 
   function signOut() {
