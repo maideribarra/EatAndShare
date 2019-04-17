@@ -57,15 +57,16 @@ function ingredientToList() {
   var li = document.createElement("li");
   var conc2 = document.getElementById("IngredientesUp").value.concat(" - ");
   var conc3 = conc2.concat( document.getElementById("cantIng").value);
-  var conc4 = conc3.concat(" ");
+  var conc4 = conc3.concat(" - ");
   var conc5 = conc4.concat( document.getElementById("cantidad").value);
-  var text = document.createTextNode(conc5);
+  var text = document.createTextNode(conc5);  
   li.appendChild(text);
   li.setAttribute("class", "list-group-item");   
   document.getElementById("listaIngred").appendChild(li);
   var conc6 = conc5.concat("%");
   var listaHide = document.getElementById("IngCantList").value;
   var textValorAnyadido = listaHide.concat(conc6);
+  console.log(textValorAnyadido);
   document.getElementById("IngCantList").value=textValorAnyadido;
   var formIngredientes = new FormData();
   formIngredientes.append('ingredientes',document.getElementById('IngredientesUp').value);

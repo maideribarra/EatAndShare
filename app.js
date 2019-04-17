@@ -91,8 +91,20 @@ app.use(function(req, res, next) {
 
 app.post('/upload',upload.single('fileToUpload'), (req, res) => {
   console.log("entro");  
+  var jsonArrayIngredientes=[];
+  var arrayIngredientes=req.body.ListaIngredientes.split('%');
+  console.log("arrayIngredientes");
+  console.log(arrayIngredientes);
+  var i;
+  for (i = 0; i < arrayIngredientes.length; i++) {
+      var arrayComponentesIngrediente=arrayIngredientes[i].split('-');
+      var ingredienteJson={"nombre":arrayComponentesIngrediente[0], "cantidad":arrayComponentesIngrediente[1],"medida":arrayComponentesIngrediente[2]};
+      jsonArrayIngredientes.push(ingredienteJson);
+      console.log("ingredienteJSON");
+      console.log(ingredienteJson);
+  } 
    var collection = conn.db.collection('recipe');
-           collection.insertOne({"Image":req.file,"Ingredientes": req.body.ListaIngredientes,
+           collection.insertOne({"Image":req.file,"Ingredientes": jsonArrayIngredientes,
              "Nombre": req.body.NameUp,//string
              "Proceso": req.body.RecetaUp,
              "Tags": req.body.TagsUp,
