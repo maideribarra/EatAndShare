@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-	<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+	  <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <!-- Bootstrap styles -->
     <!--<link href="assets/css/bootstrap.css" rel="stylesheet"/>-->
     <!-- Customize styles -->
@@ -14,8 +14,7 @@
     <!-- font awesome styles -->
 	<!--<link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">-->
 	<!--<script src="http://code.jquery.com/jquery-1.11.1.min.js">-->  
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>    
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/prettyPhoto.css" rel="stylesheet">
@@ -46,13 +45,63 @@
  
 
 $(document).ready(function(){
-
-
+  document.getElementById("cantCalorias").value=0;
 
     
     
 
   });
+
+var formIngredientes = new FormData();
+function ingredientToList() {
+  var li = document.createElement("li");
+  var conc2 = document.getElementById("IngredientesUp").value.concat(" - ");
+  var conc3 = conc2.concat( document.getElementById("cantIng").value);
+  var conc4 = conc3.concat(" ");
+  var conc5 = conc4.concat( document.getElementById("cantidad").value);
+  var text = document.createTextNode(conc5);
+  li.appendChild(text);
+  li.setAttribute("class", "list-group-item");   
+  document.getElementById("listaIngred").appendChild(li);
+  var conc6 = conc5.concat("%");
+  var listaHide = document.getElementById("IngCantList").value;
+  var textValorAnyadido = listaHide.concat(conc6);
+  document.getElementById("IngCantList").value=textValorAnyadido;
+  var formIngredientes = new FormData();
+  formIngredientes.append('ingredientes',document.getElementById('IngredientesUp').value);
+  formIngredientes.append('cantidad',document.getElementById('cantIng').value);
+  formIngredientes.append('tipo',document.getElementById('cantidad').value);
+  console.log(document.getElementById('IngredientesUp').value);
+//console.log(textValorAnyadido);
+//
+  console.log(document.getElementById('cantIng').value);
+//console.log(textValorAnyadido);
+//
+  console.log(document.getElementById('cantidad').value);
+//})
+  jQuery.ajax({
+     url: '/getCalorias',
+     type: 'POST', 
+     contentType: false,
+     processData: false,    
+     data:formIngredientes,
+     success: function () {  
+      console.log("enviado");          
+     }
+ }).done(function(data) {
+            alert("success");
+            console.log(data);
+            var calorias=document.getElementById("cantCalorias").value;
+            document.getElementById("cantCalorias").value= parseFloat(data['array'])+parseFloat(calorias);
+           
+            //console.log(data);
+        })
+        .fail(function() {
+            
+            alert("error");
+            
+        });
+}
   
 function addnIngredient() {
   // $.get( "/food", function() {
@@ -157,11 +206,12 @@ function compress(e) {
 }
 
 function submit(){
-  formData.append('IngredientesUp',document.getElementById('fileToUpload').value);
-  console.log(document.getElementById('IngredientesUp').value);
+  formData.append('Usuario',document.getElementById('Usuario').value);  
   formData.append('NameUp',document.getElementById("NameUp").value);
-  console.log("anyado nombre");
-  formData.append('RecetaUp',document.getElementById("RecetaUp").value);
+  formData.append('RecetaUp',document.getElementById("ObjectsUp").value);
+  formData.append('TagsUp',document.getElementById("TagsUp").value);
+  formData.append('Descripcion',document.getElementById("desc").value);
+  formData.append('ListaIngredientes',document.getElementById("IngCantList").value);
   jQuery.ajax({
      url: '/upload',
      type: 'POST',     
@@ -183,8 +233,6 @@ function submit(){
     <script src="/js/Navbar.js"></script>
   </section>
   <section>
-  
-
 	<hr class="soften">
 	 <div class="well well-small">
       <div class="contact-form">	
@@ -192,7 +240,7 @@ function submit(){
 	       <div class="row-fluid">
 		      <div class="span8 relative">		
 		        <div class="form-group col-md-6">
-		          <input onchange="compress(this)" type="file" name="fileToUpload" id="fileToUpload" class="custom file">
+		          <input onchange="compress(this)" type="file" name="fileToUpload" id="fileToUpload" class="custom-file-input">
               <img id="upload-Preview"/>    
 		        </div>		
             <fieldset>
@@ -200,62 +248,59 @@ function submit(){
                 <input id="NameUp" name="NameUp" type="text" placeholder="Nombre" class="form-control"/>           
               </div>
               <div class="form-group col-md-12">           
-                <input id="desc" type="text"  placeholder="description" class="form-control"/>          
+                <input id="desc" type="text" name="DescripcionUp" placeholder="description" class="form-control"/>          
               </div>
               <div class="form-group col-md-12">
-                <input rows="3" id="RecetaUp"name="RecetaUp" class="form-control"/>           
+                <input rows="3" id="TagsUp" placeholder="tags" name="TagsUp" class="form-control"/>           
               </div>
               <div class="form-group col-md-12">
-                <input rows="3" id="RecetaUp"name="RecetaUp" class="form-control"/>           
+                <input rows="3" id="ObjectsUp"name="ObjectsUp" class="form-control"/>           
               </div>     
               <div class="span8 relative">         
-                <div class="form-group col-sm-4 auto-widget"> 
-                  <input id="IngredientesUp" name="IngredientesUp" type="text" placeholder="Ingredientes" class="form-control" onclick="addnIngredient()"/>          
+                <div class="form-group col-sm-7 auto-widget"> 
+                  <input id="IngredientesUp" name="IngredienteUp" type="text" placeholder="Ingredientes" class="form-control" onclick="addnIngredient()"/>          
                 </div>
-               
+                                            
+                <div class="form-group col-sm-2">
+                  <div class="dropdown">
+                    <select class="form-control" id="cantidad">
+                      <option role="presentation">C</option>
+                      <option role="presentation">V</option>
+                      <option role="presentation">g</option>
+                      <option role="presentation">l</option>
+                    </select>
+                  </div>
+                </div>
                 <div class="form-group col-sm-2"> 
-                  <input id="Medidas" name="IngredientesUp" type="text" placeholder="Ingredientes" class="btn btn-default dropdown-toggle usa"/>          
+                  <input id="cantIng" name="Cantidad" type="number" placeholder="Ingredientes" class="form-control" step=".01"/>        
                 </div>
-                 <div class="form-group col-sm-2"> 
-                  <button id="Bingred" name="IngredientesUp" type="text" placeholder="Ingredientes" class="btn btn-group"> + </button>        
+                 <div class="form-group col-sm-1"> 
+                  <button id="Bingred"  type="text" placeholder="Ingredientes" onclick="ingredientToList()" class="btn btn-group"> + </button>        
                 </div>
-
+              </div>
+              <div class="span8 relative">
                 <div class="form-group col-sm-4"> 
-                  <input id="listaIngredientes" name="IngredientesUp" type="text" placeholder="Ingredientes" class="form-control"/>          
+                  <ul class="list-group"  id="listaIngred">
+                  </ul>
                 </div>
+                <div class="form-group col-sm-2"> 
+                  <input id="cantCalorias" name="Calorias" type="number" placeholder="Ingredientes" class="form-control" step=".01" readonly/>       
+                </div>
+              <div  class="inpMedidas hide">
+                  <input id="IngCantList" name="ListaIngredientesUp" type="text" placeholder="Ingredientes"/>          
+              </div> 
+              <div  class="inpUsuario hide">
+                  <input id="Usuario" name="usuario" type="text" placeholder="Ingredientes"/>          
+              </div> 
 		          <div class="form-group col-md-12">
 		            <button  onclick="submit()" id="submitForm" name="submit" class="btn btn-primary pull-right">Send</button>
 		          </div>
+                       
+              </div>
             </fieldset>			
 		      </div>
-          <% var photos=files %>
-          <% if(photos){ %>
-		      
-          <% photos.forEach(function(file) { %>
-              <div class="card card-body mb-3">
-                 
-                  <% var Base64  = new Buffer(file.Image.buffer.buffer).toString('base64'); %>      			   
-				        <img src=<%='data:image/png;base64,'+Base64 %> alt="picture">
-                
-               
-            </div>
-           <% })} %>
-            <% var food=[]; %>
-           <% array.forEach(function(ingrediente) { %>
-            <% food.push(ingrediente); %>
-              <div class="card card-body mb-3">
-                 
-                 <p><%= ingrediente%></p>
-                
-               
-            </div>
-           <% }) %>
-           <div id="imaginario"><%= JSON.stringify(array)%></div>
-
-             
-               
-			
-
+         
+           <div id="imaginario" class="hide"><%= JSON.stringify(array)%></div>
 	
 </div>
 <!-- 
@@ -271,8 +316,7 @@ Footer
 </section>
 <div>
 <a href="#" class="gotop"><i class="icon-double-angle-up"></i></a>
-    <!-- Placed at the end of the document so the pages load faster -->
-   
+    <!-- Placed at the end of the document so the pages load faster -->  
    
   </body>
 </html>

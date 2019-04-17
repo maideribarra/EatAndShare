@@ -2522,5 +2522,6 @@ h2.title {
 .contact-info .social-networks ul li a:hover{
   color: #80cbc4;
 }
-
-
+.inpMedidas {
+  display: none;
+}

@@ -14,8 +14,8 @@ document.write("<header id=\"header\">");
             document.write("<div class=\"shop-menu pull-right\">");
               document.write("<ul class=\"nav navbar-nav\">");
                 document.write("<li><a href=\"#\" onclick=\"signOut();\"><i class=\"fa fa-lock\"></i>Sign out</a></li>");                
-                document.write("<meta name=\"google-signin-client_id\" content=\"143667865467-8thp69i0qndof81t0o9i2dgodm3n6kq4.apps.googleusercontent.com\">");
-                document.write("<div class=\"g-signin2\" data-onsuccess=\"onSignIn\" onclick=\"onSignIn(googleUser)\";></div>");
+                document.write("<meta name=\"google-signin-client_id\" content=\"975558376993-42taqsf439ccp3gecord6blrdabvb59b.apps.googleusercontent.com\">");
+                document.write("<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>");
               document.write("</ul>");
             document.write("</div>");
           document.write("</div>");
@@ -70,6 +70,7 @@ document.write("<header id=\"header\">");
   }
   function onSignIn(googleUser) {
   var profile = googleUser.getBasicProfile();
+  document.getElementById("Usuario").value=profile.getEmail();
   console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
   console.log('Name: ' + profile.getName());
   console.log('Image URL: ' + profile.getImageUrl());

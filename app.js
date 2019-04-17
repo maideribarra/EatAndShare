@@ -9,7 +9,6 @@ const methodOverride = require('method-override');
 const app = express();  
 const Jimp = require('jimp');
 const cheerio = require('cheerio');
-//var jQuery = require('jQuery');
 var FormData = require('form-data');
 var http = require('http').Server(app);
 var request = require('request');
@@ -91,17 +90,39 @@ app.use(function(req, res, next) {
     
 
 app.post('/upload',upload.single('fileToUpload'), (req, res) => {
-  console.log("entro");
+  console.log("entro");  
    var collection = conn.db.collection('recipe');
-           collection.insertOne({"Image":req.file,"Ingredientes": req.body.IngredientesUp,
+           collection.insertOne({"Image":req.file,"Ingredientes": req.body.ListaIngredientes,
              "Nombre": req.body.NameUp,//string
-             "Proceso": req.body.RecetaUp});
-  //var Base64  = new Buffer(req.file.buffer);
- // console.log(Base64);
-  //compVision(Base64);
+             "Proceso": req.body.RecetaUp,
+             "Tags": req.body.TagsUp,
+             "Descripcion": req.body.Descripcion,
+             "Usuario": req.body.Usuario,
+           });
+  console.log(collection);
   res.redirect('/');
 });
 
+app.post('/getCalorias',upload.single(), function (req, res) {
+      var collection = conn.db.collection('food');        
+          console.log("imprimo comida");      
+      var data=req.body.ingredientes;
+      console.log(req.body);
+      console.log(req.body.ingredientes);
+      console.log(req.body.cantidad);
+      console.log(req.body.tipo);
+      
+      collection.find({nameSP: req.body.ingredientes},{ projection: {_id:0, energy:1}}
+).toArray( function (err, cal) {
+            if (err) throw err;
+            var resultado=parseFloat(cal[0]['energy'])*parseFloat(req.body.cantidad)/100.0;
+            console.log(cal);
+            console.log(parseFloat(cal[0]['energy']));
+            console.log(parseFloat(req.body.cantidad));
+           res.json({array: resultado});  
+          });  
+
+  });
 app.get('/food', function (req, res) {
       var collection = conn.db.collection('food');        
           console.log("imprimo comida");        
@@ -113,6 +134,7 @@ app.get('/food', function (req, res) {
           });  
 
   });
+
 
 
 // app.get('/bedca', (req, res) => {
