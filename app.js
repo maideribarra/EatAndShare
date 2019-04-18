@@ -23,6 +23,7 @@ var im = require('imagemagick');
 var cors = require('cors');
 //app.use(require('express-ajax'));
 var resizeImage = require('resize-image');
+var mongoosastic=require("mongoosastic");
 // Mongo URI
 const mongoURI = 'mongodb://localhost:27017/EASbd';
 
@@ -50,7 +51,33 @@ app.use(function(req, res, next) {
   next();
 });
 
-        
+var elasticsearch = require('elasticsearch');
+var client = new elasticsearch.Client({
+  host: 'localhost:9200',
+  log: 'trace'
+});
+    
+  
+
+var recetaSchema = new mongoose.Schema({  
+  Image:Object,
+  Ingredientes:{type:Array,es_indexed:true},
+  Nombre: {type:String,es_indexed:true},
+  Proceso: { type:String, es_indexed:true },
+  Tags: { type:String, es_indexed:true },
+  Usuario:String
+});
+var receta = mongoose.model("Receta", recetaSchema);
+recetaSchema.plugin(mongoosastic);
+receta.createMapping(function(err, mapping){  
+  if(err){
+    console.log('error creating mapping (you can safely ignore this)');
+    console.log(err);
+  }else{
+    console.log('mapping created!');
+    console.log(mapping);
+  }
+});
        
     
 
@@ -75,6 +102,7 @@ app.post('/upload',upload.single('fileToUpload'), (req, res) => {
              "Tags": req.body.TagsUp,
              "Descripcion": req.body.Descripcion,
              "Usuario": req.body.Usuario,
+             "Likes" : [],
            });
   console.log(collection);
   res.redirect('/');
@@ -113,9 +141,27 @@ app.get('/food', function (req, res) {
   });
 
 
+async function search(){
+   const response = await client.search({
+  index: 'twitter',
+  type: 'tweets',
+  body: {
+    query: {
+      match: {
+        body: 'elasticsearch'
+      }
+    }
+  }
+})
+ 
+for (const tweet of response.hits.hits) {
+  console.log('tweet:', tweet);
+}
 
+}
 
 app.get('/', (req, res) => {
+  search();
   var collection = conn.db.collection('recipe');
   var photos;
   collection.find().toArray((err, items) => {
@@ -162,30 +208,37 @@ app.get('/index', (req, res) => {
    
   });
           
-app.get('/addLike', (req, res) => {
+app.post('/addLike',upload.single(), (req, res) => {
+  console.log(req.body.Usuario);
   var collection = conn.db.collection('recipe');
   collection.find({_id: req.body.RecetaId},{ projection: {_id:0, likes:1}}
 ).toArray( function (err, array) {
             if (err) throw err;
             if (array.length>0){
-              if(array.includes(req.body.Usuario)){
-                var filtered = array.filter(function(value, index, arr){
+              if(array[0].includes(req.body.Usuario)){
+                var filtered = array[0].filter(function(value, index, arr){
 
                   return value!=req.body.Usuario;
 
                 });
 
-                collection.update({_id: req.body.RecetaId},{$set: { "likes" : filtered}});
+                collection.update({_id: req.body.RecetaId},{$set: { "Likes" : filtered}});
                 res.json({cantLikes: filtered.length }); 
           
               }else{
-                array.push(req.body.Usuario);
-                collection.update({_id: req.body.RecetaId},{$set: { "likes" : array}});
-                res.json({cantLikes: array.length });
+                array[0].push(req.body.Usuario);
+                collection.update({_id: req.body.RecetaId},{$set: { "Likes" : array[0]}});
+                res.json({cantLikes: array[0].length });
             
-          }}});  
+          }}else{
+            var array=[];
+            array.push(req.body.Usuario);
+            collection.updateOne({_id: req.body.RecetaId},{$set: { "Likes" : array}});
+            console.log(array);
+            console.log(req.body.Usuario);
+          }})});  
  
-  });
+  
 
 
 
