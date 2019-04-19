@@ -10,8 +10,9 @@ const app = express();
 const Jimp = require('jimp');
 const cheerio = require('cheerio');
 var FormData = require('form-data');
-var http = require('http').Server(app);
 var request = require('request');
+var http = require('http');
+var json = require('json');
 // Middleware
 app.use(express.static('./public'));
 app.use(bodyParser.json());
@@ -94,7 +95,87 @@ stream.on('error', function(err){
 
 }
 
-    
+funcion searchSuggestion(){
+  
+}
+
+app.get('/search', function (requ, re) {
+  var arrayResultado=[];
+  const options = {
+  hostname: 'localhost',
+  port: 9200,
+  path: '/recipes/_search',
+  method: 'POST',
+};
+const reque = http.request(options, (resp) => {
+  console.log(`STATUS: ${resp.statusCode}`);
+  console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
+  resp.setEncoding('utf8');
+  resp.on('data', (chunk) => {
+    console.log(`BODY: ${chunk}`);
+    respuesta=JSON.parse(chunk);
+    var respIngrediente=respuesta['suggest']['my-suggestion'][0]['options'];
+    if(respIngrediente.length>0){
+      var i=0;
+      for(i;i<respIngrediente.length;i++){
+        arrayResultado.push(respIngrediente[i]['text']);
+      }
+      
+    }
+     var respProceso=respuesta['suggest']['my-suggestion2'][0]['options'];
+    if(respProceso.length>0){
+      var i=0;
+      for(i;i<respProceso.length;i++){
+        arrayResultado.push(respProceso[i]['text']);
+      }
+      
+    }
+     var respTags=respuesta['suggest']['my-suggestion3'][0]['options'];
+    if(respTags.length>0){
+      var i=0;
+      for(i;i<respTags.length;i++){
+        arrayResultado.push(respTags[i]['text']);
+      }
+      
+    }
+    console.log(arrayResultado);
+  });
+  resp.on('end', () => {
+    console.log('No more data in response.');
+  });
+});
+
+reque.on('error', (e) => {
+  console.error(`problem with request: ${e.message}`);
+});
+reque.setHeader('Content-Type', 'application/json');
+reque.write(JSON.stringify({
+  "suggest" : {
+    "text" : "piza aceituna",
+    "my-suggestion" : {
+      "phrase" : {
+        "field" : "Ingredientes.nombre"
+      }
+    },
+    "my-suggestion2" : {
+      "phrase" : {
+        "field" : "Proceso"
+      }
+    },
+    "my-suggestion3" : {
+      "phrase" : {
+        "field" : "Tags"
+      }
+    }
+  }
+}));
+reque.end();
+re.redirect('/');
+});
+
+ 
+
+
     
 
 app.post('/upload',upload.single('fileToUpload'), (req, res) => {
