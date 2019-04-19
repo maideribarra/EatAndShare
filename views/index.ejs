@@ -101,7 +101,7 @@ function addLike(id){
                         <div class="single-products">
                           <div class="productinfo text-center">
                             <% if(item.Image!=null){ %>
-                            <% var Base64  = new Buffer(item.Image.buffer.buffer).toString('base64'); %>               
+                            <% var Base64  = new Buffer(item.Image.buffer).toString('base64'); %>               
                             <img src=<%='data:image/png;base64,'+Base64 %> alt="picture">
                             <h2><%=item.Nombre%></h2>
                             <p><%=item.Descripcion%></p>

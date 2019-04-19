@@ -113,16 +113,16 @@ app.post('/upload',upload.single('fileToUpload'), (req, res) => {
       console.log(ingredienteJson);
   } 
    //var collection = conn.db.collection('recipe');
-  Mreceta.insertMany([{//"Image":req.file,"Ingredientes": jsonArrayIngredientes,
+  Mreceta.insertMany([{"Image":req.file.buffer,"Ingredientes": jsonArrayIngredientes,
              "Nombre": req.body.NameUp,//string
              "Proceso": req.body.RecetaUp,
              "Tags": req.body.TagsUp,
              "Descripcion": req.body.Descripcion,
              "Usuario": req.body.Usuario,
-            // "Likes" : [],
+            "Likes" : [],
            }], function (err) {
       if (err){ 
-          console.log(error);
+          console.log(err);
       } else {
         console.log("Multiple documents inserted to Collection");
         res.redirect('/');
@@ -187,7 +187,7 @@ for (const tweet of response.hits.hits) {
 app.get('/', (req, res) => {
   //migracion();
   //search();
-  var collection = conn.db.collection('recipe');
+  var collection = conn.db.collection('recipes');
   var photos;
   collection.find({}, function (err, items) {
     console.log(items.length);
@@ -217,7 +217,7 @@ app.get('/', (req, res) => {
    
 });
 app.get('/index', (req, res) => {
-  var collection = conn.db.collection('recipe');
+  var collection = conn.db.collection('recipes');
   var photos;
   collection.find().toArray((err, items) => {
     console.log(items.length);
@@ -234,7 +234,7 @@ app.get('/index', (req, res) => {
           
 app.post('/addLike',upload.single(), (req, res) => {
   console.log(req.body.Usuario);
-  var collection = conn.db.collection('recipe');
+  var collection = conn.db.collection('recipes');
   collection.find({_id: req.body.RecetaId},{ projection: {_id:0, likes:1}}
 ).toArray( function (err, array) {
             if (err) throw err;
