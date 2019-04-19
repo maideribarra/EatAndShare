@@ -1,16 +1,14 @@
 var mongoose = require('mongoose');
-
+var mongoosastic = require('mongoosastic');
 var Schema = mongoose.Schema;
-
-var recetaSchema = new Schema({
-  //Usuario: { type: String },//string
-  Imagen: { data: Buffer, contentType: String },// string
-  Ingredientes: [{nombreIngrediente:{ type: String }}],// array
-  Nombre: { type: String },//string
-  Proceso: { type: String },//string
-  Likes: [{usuario:{ type:String }}],//array
-  Comentarios: [{usuario:{ type:String },comentario:{type:String}}]
-  
-  });
-
-module.exports = mongoose.model('Receta', recetaSchema);
+var ingredienteSchema = new Schema ({nombre:String,cantidad:Number,medida:String});
+var recetaSchema = new Schema({  
+  Image:{ any: Object },
+  Ingredientes:{type:[ingredienteSchema],es_indexed:true},
+  Nombre: {type:String,es_indexed:true},
+  Proceso: { type:String, es_indexed:true },
+  Tags: { type:String, es_indexed:true },
+  Usuario:String,
+  Likes:[String]
+});
+module.exports=recetaSchema;

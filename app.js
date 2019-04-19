@@ -26,19 +26,32 @@ var resizeImage = require('resize-image');
 var mongoosastic=require("mongoosastic");
 // Mongo URI
 const mongoURI = 'mongodb://localhost:27017/EASbd';
+var elasticsearch = require('elasticsearch');
+var client = new elasticsearch.Client({
+  host: 'localhost:9200',
+  log: 'trace'
+});
 
 // Create mongo connection
-const conn = mongoose.createConnection(mongoURI);
+
+const conn = mongoose.createConnection(mongoURI,function(error) {
+  // Check error in initial connection. There is no 2nd param to the callback.
+  console.log(error);
+});
+var recetaSchema =require("./models/Receta");
+var recS=recetaSchema.plugin(mongoosastic);
+var Mreceta = conn.model('recipe', recS),stream = Mreceta.synchronize({}, {saveOnSynchronize: true}),count = 0;
+
 
 
 // Init gfs
 let gfs;
 
-conn.once('open', () => {
+//conn.once('open', () => {
   // Init stream
   //gfs = Grid(conn.db, mongoose.mongo);  
   //gfs.collection('recipe');
-});
+//});
 
 const UPLOAD_PATH = 'uploads';
 
@@ -51,37 +64,41 @@ app.use(function(req, res, next) {
   next();
 });
 
-var elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'trace'
-});
-    
-  
 
-var recetaSchema = new mongoose.Schema({  
+    
+function migracion(){
+  var recetaSchema = new mongoose.Schema({  
   Image:Object,
   Ingredientes:{type:Array,es_indexed:true},
   Nombre: {type:String,es_indexed:true},
   Proceso: { type:String, es_indexed:true },
   Tags: { type:String, es_indexed:true },
-  Usuario:String
+  Usuario:String,
+  Likes:Array
 });
-var receta = mongoose.model("Receta", recetaSchema);
-recetaSchema.plugin(mongoosastic);
-receta.createMapping(function(err, mapping){  
-  if(err){
-    console.log('error creating mapping (you can safely ignore this)');
-    console.log(err);
-  }else{
-    console.log('mapping created!');
-    console.log(mapping);
-  }
+  recetaSchema.plugin(mongoosastic);
+var receta = mongoose.model('recipe', recetaSchema),stream = receta.synchronize({}, {saveOnSynchronize: true}),count = 0;
+
+ 
+stream.on('data', function(err, doc){
+  count++;
+  console.log(count);
 });
-       
+stream.on('close', function(){
+  console.log('indexed ' + count + ' documents!');
+});
+stream.on('error', function(err){
+  console.log(err);
+});
+
+
+}
+
+    
     
 
 app.post('/upload',upload.single('fileToUpload'), (req, res) => {
+  var Mreceta = conn.model('recipe', recS),stream = Mreceta.synchronize({}, {saveOnSynchronize: true}),count = 0;
   console.log("entro");  
   var jsonArrayIngredientes=[];
   var arrayIngredientes=req.body.ListaIngredientes.split('%');
@@ -95,17 +112,24 @@ app.post('/upload',upload.single('fileToUpload'), (req, res) => {
       console.log("ingredienteJSON");
       console.log(ingredienteJson);
   } 
-   var collection = conn.db.collection('recipe');
-           collection.insertOne({"Image":req.file,"Ingredientes": jsonArrayIngredientes,
+   //var collection = conn.db.collection('recipe');
+  Mreceta.insertMany([{//"Image":req.file,"Ingredientes": jsonArrayIngredientes,
              "Nombre": req.body.NameUp,//string
              "Proceso": req.body.RecetaUp,
              "Tags": req.body.TagsUp,
              "Descripcion": req.body.Descripcion,
              "Usuario": req.body.Usuario,
-             "Likes" : [],
-           });
-  console.log(collection);
-  res.redirect('/');
+            // "Likes" : [],
+           }], function (err) {
+      if (err){ 
+          console.log(error);
+      } else {
+        console.log("Multiple documents inserted to Collection");
+        res.redirect('/');
+      }
+    });  
+  
+  
 });
 
 app.post('/getCalorias',upload.single(), function (req, res) {
@@ -161,14 +185,15 @@ for (const tweet of response.hits.hits) {
 }
 
 app.get('/', (req, res) => {
-  search();
+  //migracion();
+  //search();
   var collection = conn.db.collection('recipe');
   var photos;
-  collection.find().toArray((err, items) => {
+  collection.find({}, function (err, items) {
     console.log(items.length);
     photos=items;
      if (items.length === 0) {
-      res.render('uploadRecipe', { files: false });
+      photos=false;
     } else {
       console.log(items[1]);
           
@@ -184,7 +209,6 @@ app.get('/', (req, res) => {
               valores.push(Object.values(food[x])[0]);
             }
             if (err) throw err;
-            console.log({array:valores});
             res.render('uploadRecipe', { array:valores, files: photos });  
           }); 
     //Check if files
