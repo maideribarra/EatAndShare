@@ -95,8 +95,44 @@ stream.on('error', function(err){
 
 }
 
-funcion searchSuggestion(){
-  
+function searchSuggestion(){
+  var arrayResultado=[];
+  const options = {
+  hostname: 'localhost',
+  port: 9200,
+  path: '/recipes/_search',
+  method: 'POST',
+};
+const reque = http.request(options, (resp) => {
+  console.log(`STATUS: ${resp.statusCode}`);
+  console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
+  resp.setEncoding('utf8');
+  resp.on('data', (chunk) => {
+    console.log(`BODY: ${chunk}`);
+    respuesta=JSON.parse(chunk);
+  });
+  resp.on('end', () => {
+    console.log('No more data in response.');
+  });
+});
+
+reque.on('error', (e) => {
+  console.error(`problem with request: ${e.message}`);
+});
+reque.setHeader('Content-Type', 'application/json');
+reque.write(JSON.stringify({
+  "query": {
+    "multi_match" : {
+      "query":      "freir carne",
+      "type":       "phrase",
+      "fields":     [ "Nombre", "Proceso","Tags" ]
+    }
+  }
+}
+));
+reque.end();
+re.redirect('/');
+
 }
 
 app.get('/search', function (requ, re) {
@@ -173,7 +209,36 @@ reque.end();
 re.redirect('/');
 });
 
- 
+app.get('/barcode', function (requ, re) {
+  //https://world.openfoodfacts.org/api/v0/product/8410066108572
+   var arrayResultado=[];
+  const options = {
+  hostname: 'world.openfoodfacts.org',
+  path: '/api/v0/product/8410066108572',
+  method: 'GET',
+};
+const reque = http.request(options, (resp) => {
+  console.log(`STATUS: ${resp.statusCode}`);
+  console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
+  resp.setEncoding('utf8');
+  resp.on('data', (chunk) => {
+    console.log(`BODY: ${chunk}`);
+    var jsingrediente=JSON.parse(chunk);
+    var ingrediente={calorias :jsingrediente['product']['nutriments']['energy_value'],medida:jsingrediente['product']['nutriments']['energy_unit'],image:jsingrediente['product']['image_front_url']};
+    console.log(ingrediente);
+  });
+  resp.on('end', () => {
+    console.log('No more data in response.');
+  });
+});
+
+reque.on('error', (e) => {
+  console.error(`problem with request: ${e.message}`);
+});
+reque.end();
+re.redirect('/');
+
+});
 
 
     
