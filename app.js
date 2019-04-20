@@ -13,6 +13,7 @@ var FormData = require('form-data');
 var request = require('request');
 var http = require('http');
 var json = require('json');
+var url = require('url');
 // Middleware
 app.use(express.static('./public'));
 app.use(bodyParser.json());
@@ -209,34 +210,46 @@ reque.end();
 re.redirect('/');
 });
 
-app.get('/barcode', function (requ, re) {
+app.get('/barcode/:id?/:cantidad?', function (requ, re) {
+  var code = requ.params['id'];
+  console.log("code:");
+  console.log( code);
+  console.log(requ.params['cantidad']);
+  var str1='/api/v0/product/';
+  var path=str1.concat(code);
   //https://world.openfoodfacts.org/api/v0/product/8410066108572
    var arrayResultado=[];
   const options = {
   hostname: 'world.openfoodfacts.org',
-  path: '/api/v0/product/8410066108572',
+  path: path,
   method: 'GET',
 };
+ var body = "";
 const reque = http.request(options, (resp) => {
   console.log(`STATUS: ${resp.statusCode}`);
   console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
   resp.setEncoding('utf8');
   resp.on('data', (chunk) => {
-    console.log(`BODY: ${chunk}`);
-    var jsingrediente=JSON.parse(chunk);
-    var ingrediente={calorias :jsingrediente['product']['nutriments']['energy_value'],medida:jsingrediente['product']['nutriments']['energy_unit'],image:jsingrediente['product']['image_front_url']};
-    console.log(ingrediente);
-  });
+    body+=chunk;
+    //console.log(`BODY: ${body}`);
+      });
   resp.on('end', () => {
     console.log('No more data in response.');
+    var jsingrediente=JSON.parse(body);
+    var ingrediente={name: jsingrediente['product']['ingredients_text_es'],calorias :jsingrediente['product']['nutriments']['energy_value'],medida:jsingrediente['product']['nutriments']['energy_unit'],image:jsingrediente['product']['image_front_url']};
+    console.log(ingrediente);
+    var kcal  =  ingrediente['calorias'];
+    var kcalTotal =  getCaloriasPerCant(kcal,requ.params['cantidad']);
+    re.json({calorias: kcalTotal,imagen:ingrediente['image'],name:jsingrediente['product']['ingredients_text_es']});
   });
 });
 
 reque.on('error', (e) => {
   console.error(`problem with request: ${e.message}`);
 });
+reque.setHeader('Content-Type', 'application/json');
 reque.end();
-re.redirect('/');
+//re.redirect('/');
 
 });
 
@@ -278,6 +291,15 @@ app.post('/upload',upload.single('fileToUpload'), (req, res) => {
   
 });
 
+function getCaloriasPerCant(energy,cantidad){
+  return parseFloat(energy)*parseFloat(cantidad)/100.0;
+
+}
+
+function toKcal(kJ){
+  return parseFloat(kJ)*0.2388; 
+}
+
 app.post('/getCalorias',upload.single(), function (req, res) {
       var collection = conn.db.collection('food');        
           console.log("imprimo comida");      
@@ -290,7 +312,7 @@ app.post('/getCalorias',upload.single(), function (req, res) {
       collection.find({nameSP: req.body.ingredientes},{ projection: {_id:0, energy:1}}
 ).toArray( function (err, cal) {
             if (err) throw err;
-            var resultado=parseFloat(cal[0]['energy'])*parseFloat(req.body.cantidad)/100.0;
+            var resultado=getCaloriasPerCant(cal[0]['energy'],req.body.cantidad);
             console.log(cal);
             console.log(parseFloat(cal[0]['energy']));
             console.log(parseFloat(req.body.cantidad));
