@@ -403,29 +403,33 @@ app.get('/index', (req, res) => {
 app.post('/addLike',upload.single(), (req, res) => {
   console.log(req.body.Usuario);
   var collection = conn.db.collection('recipes');
-  collection.find({_id: req.body.RecetaId},{ projection: {_id:0, likes:1}}
+  collection.find({_id:mongoose.Types.ObjectId(req.body.RecetaId)},{ projection: {Likes:1}}
 ).toArray( function (err, array) {
+            console.log(array);
             if (err) throw err;
-            if (array.length>0){
-              if(array[0].includes(req.body.Usuario)){
-                var filtered = array[0].filter(function(value, index, arr){
+            if (array[0]['Likes'].length>0){
+              if(array[0]['Likes'].includes(req.body.Usuario)){
+                var filtered = array[0]['Likes'].filter(function(value, index, arr){
 
                   return value!=req.body.Usuario;
 
                 });
-
-                collection.update({_id: req.body.RecetaId},{$set: { "Likes" : filtered}});
+                var collection = conn.db.collection('recipes');
+                collection.updateOne({_id: mongoose.Types.ObjectId(req.body.RecetaId)},{$set: { "Likes" : filtered}});
                 res.json({cantLikes: filtered.length }); 
           
               }else{
-                array[0].push(req.body.Usuario);
-                collection.update({_id: req.body.RecetaId},{$set: { "Likes" : array[0]}});
-                res.json({cantLikes: array[0].length });
+                var collection = conn.db.collection('recipes');
+                array[0]['Likes'].push(req.body.Usuario);
+                collection.update({_id: mongoose.Types.ObjectId((req.body.RecetaId))},{$set: { "Likes" : array[0]['Likes']}});
+                res.json({cantLikes: array[0]['Likes'].length });
             
           }}else{
+            var collection = conn.db.collection('recipes');
             var array=[];
             array.push(req.body.Usuario);
-            collection.updateOne({_id: req.body.RecetaId},{$set: { "Likes" : array}});
+            console.log(req.body.RecetaId);
+            collection.updateOne({_id: mongoose.Types.ObjectId(req.body.RecetaId)},{$set: { "Likes" : array},$currentDate: { lastModified: true }});
             console.log(array);
             console.log(req.body.Usuario);
           }})});  
