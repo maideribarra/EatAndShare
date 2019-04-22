@@ -7,7 +7,7 @@ document.write("<header id=\"header\">");
               document.write("<a href=\"index.html\"><img src=\"images/grilling-308914_640.png\" alt=\"\" /></a>");
             document.write("</div>");
             document.write("<div class=\"searchform\">");
-            document.write("<input type=\"text\" placeholder=\"Search\" />");               
+            document.write("<input type=\"text\" id=\"search\" placeholder=\"Search\" />");               
           document.write("</div>");            
           document.write("</div>");          
           document.write("<div class=\"col-sm-8\">");
@@ -79,3 +79,20 @@ document.write("<header id=\"header\">");
   console.log('Image URL: ' + profile.getImageUrl());
   console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
 }
+
+  
+  jQuery('#search').keypress(function(e) {
+    var path='/search/'
+  var query=path.concat(text);
+    var keycode = (e.keyCode ? e.keyCode : e.which);
+    if (keycode == '13') {
+        jQuery.ajax({
+          url: query,
+          type: 'GET', 
+          success: function () {  
+            console.log("enviado");          
+          }
+ })
+    }
+});
+  

@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const GridFsStorage = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
+
 const methodOverride = require('method-override');
 const app = express();  
 const Jimp = require('jimp');
@@ -70,14 +71,14 @@ app.use(function(req, res, next) {
     
 function migracion(){
   var recetaSchema = new mongoose.Schema({  
-  Image:Object,
+  Image:{Object,
   Ingredientes:{type:Array,es_indexed:true},
   Nombre: {type:String,es_indexed:true},
   Proceso: { type:String, es_indexed:true },
   Tags: { type:String, es_indexed:true },
-  Usuario:String,
-  Likes:Array
-});
+  Usuario: {type:String,es_indexed:true},
+  Likes:{type:Array,es_indexed:true}
+}});
   recetaSchema.plugin(mongoosastic);
 var receta = mongoose.model('recipe', recetaSchema),stream = receta.synchronize({}, {saveOnSynchronize: true}),count = 0;
 
@@ -95,25 +96,41 @@ stream.on('error', function(err){
 
 
 }
-
-function searchSuggestion(){
+var resultado=[];
+var arraySearchSugestion=[];
+async function searchSuggestion(phrase){
   var arrayResultado=[];
-  const options = {
-  hostname: 'localhost',
-  port: 9200,
-  path: '/recipes/_search',
-  method: 'POST',
-};
-const reque = http.request(options, (resp) => {
-  console.log(`STATUS: ${resp.statusCode}`);
-  console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
+  const options = {  hostname: 'localhost',  port: 9200,  path: '/recipes/_search',  method: 'POST'};
+  const reque = http.request(options, (resp) => {
+  //console.log(`STATUS: ${resp.statusCode}`);
+  //console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
   resp.setEncoding('utf8');
+  var body="";
   resp.on('data', (chunk) => {
-    console.log(`BODY: ${chunk}`);
-    respuesta=JSON.parse(chunk);
+    //console.log(`BODY: ${chunk}`);
+    body+=chunk;
+
+   
   });
-  resp.on('end', () => {
-    console.log('No more data in response.');
+  resp.on('end',async function() {
+    //console.log('No more data in response.');
+    //console.log(body);
+     var jbody=await JSON.parse(body);
+     arraySearchSugestion=jbody["hits"]["hits"];
+     var j=0;
+    //console.log("arraySearchSugestion");
+
+    //console.log(arraySearchSugestion);
+    
+    for(j;j<arraySearchSugestion.length;j++){
+     arraySearchSugestion[j]["_source"]["_id"]=arraySearchSugestion[j]["_id"];
+      resultado.push(arraySearchSugestion[j]["_source"]);
+    }
+   // resultado=resultado.concat(arraySearchSugestion);
+    //console.log("resultado");
+    //console.log(resultado);
+    
+     
   });
 });
 
@@ -121,93 +138,131 @@ reque.on('error', (e) => {
   console.error(`problem with request: ${e.message}`);
 });
 reque.setHeader('Content-Type', 'application/json');
-reque.write(JSON.stringify({
-  "query": {
-    "multi_match" : {
-      "query":      "freir carne",
-      "type":       "phrase",
-      "fields":     [ "Nombre", "Proceso","Tags" ]
-    }
-  }
-}
-));
+var queryPlantilla={"query": {"multi_match" : {"query":"freir carne","type":"phrase","fields":[ "Nombre", "Proceso","Tags" ]}}};
+queryPlantilla["query"]["multi_match"]["query"]=phrase;
+reque.write(JSON.stringify(queryPlantilla));
 reque.end();
-re.redirect('/');
+
 
 }
-
-app.get('/search', function (requ, re) {
+async function concatSugesstions(body){
   var arrayResultado=[];
-  const options = {
-  hostname: 'localhost',
-  port: 9200,
-  path: '/recipes/_search',
-  method: 'POST',
-};
-const reque = http.request(options, (resp) => {
-  console.log(`STATUS: ${resp.statusCode}`);
-  console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
-  resp.setEncoding('utf8');
-  resp.on('data', (chunk) => {
-    console.log(`BODY: ${chunk}`);
-    respuesta=JSON.parse(chunk);
-    var respIngrediente=respuesta['suggest']['my-suggestion'][0]['options'];
-    if(respIngrediente.length>0){
-      var i=0;
-      for(i;i<respIngrediente.length;i++){
-        arrayResultado.push(respIngrediente[i]['text']);
-      }
-      
-    }
-     var respProceso=respuesta['suggest']['my-suggestion2'][0]['options'];
-    if(respProceso.length>0){
-      var i=0;
-      for(i;i<respProceso.length;i++){
-        arrayResultado.push(respProceso[i]['text']);
-      }
-      
-    }
-     var respTags=respuesta['suggest']['my-suggestion3'][0]['options'];
-    if(respTags.length>0){
-      var i=0;
-      for(i;i<respTags.length;i++){
-        arrayResultado.push(respTags[i]['text']);
-      }
-      
-    }
-    console.log(arrayResultado);
+   var respuesta= await JSON.parse(body);
+    var respNombre=await takeResponseSugesstions('my-suggestion',respuesta);
+    var respProceso=await takeResponseSugesstions('my-suggestion2',respuesta);
+    var respTags=await takeResponseSugesstions('my-suggestion3',respuesta);
+    arrayResultadoM=await respNombre.concat(respProceso);
+    arrayResultado=await arrayResultadoM.concat(respTags);
+    //console.log(arrayResultado);
+    //console.log("devuelvo resultado");
+    return arrayResultado;
+     //do something
+    
+    
+        
+      return arrayResultado;
+}
+var flag=false;
+var arraySugesstions=[];
+function getSugetions(phrase){
+  
+  const options = {  hostname: 'localhost',  port: 9200,  path: '/recipes/_search',  method: 'POST'};
+  const reque = http.request(options, (resp) => {
+    //console.log(`STATUS: ${resp.statusCode}`);
+    //console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
+    resp.setEncoding('utf8');
+    var body="";
+    resp.on('data', (chunk) => {
+      //console.log(`BODY: ${chunk}`);
+      body+=chunk;
+
+
   });
   resp.on('end', () => {
-    console.log('No more data in response.');
+    flag=true;
+    //console.log('No more data in response.');
+     arraySugesstions= concatSugesstions(body);
+          
   });
+  
+    //do what you need here
+   
+
+  
+
 });
 
 reque.on('error', (e) => {
   console.error(`problem with request: ${e.message}`);
 });
 reque.setHeader('Content-Type', 'application/json');
-reque.write(JSON.stringify({
-  "suggest" : {
-    "text" : "piza aceituna",
-    "my-suggestion" : {
-      "phrase" : {
-        "field" : "Ingredientes.nombre"
-      }
-    },
-    "my-suggestion2" : {
-      "phrase" : {
-        "field" : "Proceso"
-      }
-    },
-    "my-suggestion3" : {
-      "phrase" : {
-        "field" : "Tags"
-      }
-    }
-  }
-}));
+var bodyRequestPlantilla = {"suggest" : {"text" : "piza aceituna","my-suggestion" : {"phrase" : {"field" : "Ingredientes.nombre"}},"my-suggestion2" : {"phrase" : {"field" : "Proceso"}},"my-suggestion3" : {"phrase" : {"field" : "Tags"}}}};
+bodyRequestPlantilla["suggest"]["text"]=phrase;
+//console.log(bodyRequestPlantilla);
+reque.write(JSON.stringify(bodyRequestPlantilla));
 reque.end();
-re.redirect('/');
+
+}
+
+function takeResponseSugesstions(sugesstion,respuesta){
+  var arrayResultado=[];
+  var respIngrediente=respuesta['suggest'][sugesstion][0]['options'];
+      if(respIngrediente.length>0){
+        var i=0;
+        for(i;i<respIngrediente.length;i++){
+          arrayResultado.push(respIngrediente[i]['text']);
+        }
+      
+      }
+      return arrayResultado;
+}
+async function getResultSuggestion(value,i){
+   var resultadoSugesstion=[];
+  // var resultado=[];
+      
+      arraySS=searchSuggestion(value[i]);
+       
+       
+
+      
+
+  
+    
+
+    
+
+}
+app.get('/search/:text?',async function (requ, re) {
+  var phrase=requ.params['text'];
+  flag=false;
+  getSugetions(phrase);  
+   setTimeout(function(){
+    //do what you need here
+    var i=0;
+  
+  
+  arraySugesstions.then(async function(value) {
+    //console.log("Sugesstions");
+    //console.log(value);
+    for(i;i<value.length;i++){
+      //var res= await getResultSuggestion(value,i);
+      searchSuggestion(value[i]);
+      
+
+   }
+   setTimeout(function(){
+  console.log("RENDERIZO");
+  console.log(resultado);
+re.render('index', { items: resultado });
+resultado=[];
+
+}, 4000);
+ 
+});
+    
+}, 4000);
+ 
+  
 });
 
 app.get('/barcode/:id?/:cantidad?', function (requ, re) {

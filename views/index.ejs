@@ -14,29 +14,30 @@
     <!-- font awesome styles -->
   <!--<link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">-->
   <!--<script src="http://code.jquery.com/jquery-1.11.1.min.js">-->  
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>    
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/prettyPhoto.css" rel="stylesheet">
-    <link href="css/price-range.css" rel="stylesheet">
-    <link href="css/animate.css" rel="stylesheet">
-    <link href="css/main.css" rel="stylesheet">
-    <link href="css/responsive.css" rel="stylesheet">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
-    <script src='https://cdn.rawgit.com/pguso/jquery-plugin-circliful/master/js/jquery.circliful.min.js'></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script> -->  
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/font-awesome.min.css" rel="stylesheet">
+    <link href="/css/prettyPhoto.css" rel="stylesheet">
+    <link href="/css/price-range.css" rel="stylesheet">
+    <link href="/css/animate.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
+     <link href="/css/heart.css" rel="stylesheet">
+    <link href="/css/responsive.css" rel="stylesheet">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/ico/apple-touch-icon-57-precomposed.png">
+    <!--<script src='https://cdn.rawgit.com/pguso/jquery-plugin-circliful/master/js/jquery.circliful.min.js'></script>-->
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="/resources/demos/style.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-  <script src="assets/js/bootstrap.min.js"></script>
+  <script src="/assets/js/bootstrap.min.js"></script>
  
   
   <!-- Favicons -->
-    <link rel="shortcut icon" href="assets/ico/favicon.ico">
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico">
     <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
 <title>client</title>
@@ -50,6 +51,16 @@ $(document).ready(function(){
     
 
   });
+function addheart(obj){
+  obj.setAttribute("class", "heart");
+  setTimeout(function(){
+    //do what you need here
+window.location.reload();
+
+
+}, 2000);
+  
+}
 function addLike(id){
   var formData = new FormData();
   console.log(id);
@@ -65,7 +76,17 @@ function addLike(id){
      success: function () {  
       console.log("enviado");          
      }
- });
+ }).done(function(data) {
+            //alert("success");
+            //console.log(data);
+            //window.location.reload(); 
+                     
+        })
+        .fail(function() {
+            
+            alert("error");
+            
+        });
   
 }
 
@@ -81,27 +102,33 @@ function addLike(id){
   <section>
     <div class="container">
       <div class="row">
-        <div class="col-sm-3">
-        </div>
         
-        <div class="col-sm-9 padding-right">
+        
+        <div class="col-sm-12 padding-right">
               
           <div class="category-tab"><!--category-tab-->
               
-            <div class="recommended_items"><!--recommended_items-->
+            <!--<div class="recommended_items"><!--recommended_items-->
               <h2 class="title text-center">Recetas</h2>
               
-              <div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
+              <!--<div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">-->
                 <div class="carousel-inner">
                   <div class="item active"> 
                   <% if(items){ %>          
                     <% items.forEach(function(item) { %>
                     <div class="col-sm-4">
+                     
                       <div class="product-image-wrapper">
                         <div class="single-products">
+                          
                           <div class="productinfo text-center">
                             <% if(item.Image!=null){ %>
-                            <% var Base64  = new Buffer(item.Image.buffer).toString('base64'); %>               
+                            <% try { %>
+                              <% var Base64  = new Buffer(item.Image.buffer).toString('base64'); %>
+                            <% }catch(error) { %>
+                              <% var Base64  = new Buffer(item.Image.data).toString('base64'); %>
+                              <% } %>
+                                           
                             <img src=<%='data:image/png;base64,'+Base64 %> alt="picture">
                             <h2><%=item.Nombre%></h2>
                             <p><%=item.Descripcion%></p>
@@ -110,12 +137,13 @@ function addLike(id){
                              <div class="hastag">
                               <p><%=tagsHastag%></p>
                              </div>                             
-                             <div>
+                              <div onclick="addheart(this)">
                                 <div  class="hide">
                                   <p id="idReceta"><%=item._id%></p>                                        
                                 </div>
-                                <a href="#" class="btn btn-default add-to-cart" onclick="addLike('<%=item._id%>')" ><i class="fa fa-shopping-cart"></i><%=item.Usuario%></a>
+                                <a href="#" class="btn btn-default add-to-cart" onclick="addLike('<%=item._id%>')" ><i class="fa fa-shopping-cart"></i><%=item.Likes.length%></a>
                              </div>
+
                           </div>
                           
                           
@@ -126,14 +154,14 @@ function addLike(id){
               <% } %>
              <% })} %>                           
                 </div>
-                 <a class="left recommended-item-control" href="#recommended-item-carousel" data-slide="prev">
+                 <!--<a class="left recommended-item-control" href="#recommended-item-carousel" data-slide="prev">
                   <i class="fa fa-angle-left"></i>
                   </a>
                   <a class="right recommended-item-control" href="#recommended-item-carousel" data-slide="next">
                   <i class="fa fa-angle-right"></i>
-                  </a>      
-              </div>
-            </div><!--/recommended_items-->
+                  </a>      -->
+             <!-- </div>-->
+            <!--</div><!--/recommended_items-->
             
           </div>
         </div>
