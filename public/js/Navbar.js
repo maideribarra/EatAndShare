@@ -83,16 +83,26 @@ document.write("<header id=\"header\">");
   
   jQuery('#search').keypress(function(e) {
     var path='/search/'
-  var query=path.concat(text);
+  var query=path.concat(document.getElementById("search").value);
     var keycode = (e.keyCode ? e.keyCode : e.which);
     if (keycode == '13') {
         jQuery.ajax({
           url: query,
           type: 'GET', 
           success: function () {  
-            console.log("enviado");          
+            console.log("enviado");  
+
           }
- })
+ }).done(function(data) {
+             
+                     
+        })
+        .fail(function() {
+            
+            alert("error");
+            
+        });
+  
     }
 });
   

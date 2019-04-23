@@ -40,8 +40,15 @@ var client = new elasticsearch.Client({
 const conn = mongoose.createConnection(mongoURI,function(error) {
   // Check error in initial connection. There is no 2nd param to the callback.
   console.log(error);
+
+
 });
+
+
 var recetaSchema =require("./models/Receta");
+
+
+
 var recS=recetaSchema.plugin(mongoosastic);
 var Mreceta = conn.model('recipe', recS),stream = Mreceta.synchronize({}, {saveOnSynchronize: true}),count = 0;
 
@@ -439,6 +446,12 @@ app.get('/', (req, res) => {
     
    
 });
+app.get('/restaurante', (req, res) => {
+      res.render('Restaurant',{});
+    
+  
+   
+  });
 app.get('/index', (req, res) => {
   var collection = conn.db.collection('recipes');
   var photos;
