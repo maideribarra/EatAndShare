@@ -28,6 +28,7 @@
     "multer-gridfs-storage": "^3.2.3",
     "path": "^0.12.7",
     "php": "0.0.1",
+    "quagga": "^0.12.1",
     "request": "^2.88.0",
     "resize-image": "^0.1.0",
     "sharp": "^0.21.3",
