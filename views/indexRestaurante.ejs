@@ -58,9 +58,9 @@ function addLike(id){
   console.log(id);
   formData.append('Usuario',document.getElementById('Usuario').value);  
   console.log(document.getElementById('Usuario').value);
-  formData.append('RecetaId',id);
+  formData.append('RestauranteId',id);
   jQuery.ajax({
-     url: '/addLike',
+     url: '/addLikeRestaurant',
      type: 'POST',     
      contentType: false,
      processData: false,
@@ -123,13 +123,24 @@ function addLike(id){
                               <% } %>
                                            
                             <img src=<%='data:image/png;base64,'+Base64 %> alt="picture">
-                            <h2><%=item.Nombre%></h2>
+                            <h2><%=item.NombrePlato%></h2>
                             <p><%=item.Descripcion%></p>
                             <% var tags=item.Tags.split(',')%>
                              <% var tagsHastag=tags.join('# ')%>
                              <div class="hastag">
                               <p><%=tagsHastag%></p>
-                             </div>                             
+                             </div>
+                             <div class="row">
+                              <div class="col-sm-4">
+                              <p><%=item.Ciudad%></p>
+                              </div>
+                              <div class="col-sm-4">
+                                <p><%=item.NombreRestaurante%></p>
+                              </div>                           
+                              <div class="col-sm-4">
+                                <p><%=item.Precio%> €</p>
+                              </div> 
+                             </div>                            
                               <div onclick="addheart(this)">
                                 <div  class="hide">
                                   <p id="idReceta"><%=item._id%></p>                                        

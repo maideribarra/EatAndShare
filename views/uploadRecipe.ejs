@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Eat\&Share</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+	  <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <!-- Bootstrap styles -->
+    <!--<link href="assets/css/bootstrap.css" rel="stylesheet"/>-->
+    <!-- Customize styles -->
+    <!--<link href="style.css" rel="stylesheet"/>-->
+    <!-- font awesome styles -->
+	<!--<link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">-->
+	<!--<script src="http://code.jquery.com/jquery-1.11.1.min.js">-->  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>    
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/prettyPhoto.css" rel="stylesheet">
+    <link href="css/price-range.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+	  <link href="css/main.css" rel="stylesheet">
+	  <link href="css/responsive.css" rel="stylesheet">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+    <script src='https://cdn.rawgit.com/pguso/jquery-plugin-circliful/master/js/jquery.circliful.min.js'></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="/js/quagga.js"></script>
+  <script src="/js/quagga.min.js"></script>
+  
+
+  <script src="assets/js/bootstrap.min.js"></script>
+ 
+	
+	<!-- Favicons -->
+    <link rel="shortcut icon" href="assets/ico/favicon.ico">
+    <head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+<title>client</title>
+
+<script type="text/javascript">
+ 
+
+$(document).ready(function(){
+  document.getElementById("cantCalorias").value=0;
+    });
+
+function updateCalorias(nuevasCalorias){
+  var calorias=document.getElementById("cantCalorias").value;
+  console.log(calorias);
+  console.log(nuevasCalorias);  
+  document.getElementById("cantCalorias").value= parseFloat(nuevasCalorias)+parseFloat(calorias);
+           
+
+}
+function openScann(){
+  Quagga.init({
+  inputStream: {
+      name: "Live",
+      type: "LiveStream",
+      constraints: {
+            width: 640,
+            height: 480,
+            facing: "environment"
+        }
+  },
+  locator: {
+    patchSize: "medium",
+    halfSample: true
+  },
+  numOfWorkers: 4,
+  locate: true,
+  decoder : {
+      readers: ["code_128_reader", "ean_reader"]
+  }
+}, function() {
+  Quagga.start();
+});
+
+Quagga.onDetected(function(result) {
+  var code = result.codeResult.code;
+  document.getElementById("BarcodeUp").value = code;
+  console.log(code);
+  getBarcodeCalories();
+});
+
+
+}
+
+function updateList(){
+  var li = document.createElement("li");
+  var conc2 = document.getElementById("IngredientesUp").value.concat(" - ");
+  var conc3 = conc2.concat( document.getElementById("cantIng").value);
+  var conc4 = conc3.concat(" - ");
+  var conc5 = conc4.concat( document.getElementById("cantidad").value);
+  var text = document.createTextNode(conc5);  
+  li.appendChild(text);
+  li.setAttribute("class", "list-group-item");   
+  document.getElementById("listaIngred").appendChild(li);
+  var conc6 = conc5.concat("%");
+  var listaHide = document.getElementById("IngCantList").value;
+  var textValorAnyadido = listaHide.concat(conc6);
+  console.log(textValorAnyadido);
+  document.getElementById("IngCantList").value=textValorAnyadido;
+  
+
+}
+var formIngredientes = new FormData();
+function ingredientToList() {
+  updateList();
+  var formIngredientes = new FormData();
+  formIngredientes.append('ingredientes',document.getElementById('IngredientesUp').value);
+  formIngredientes.append('cantidad',document.getElementById('cantIng').value);
+  formIngredientes.append('tipo',document.getElementById('cantidad').value);
+  console.log(document.getElementById('IngredientesUp').value);
+//console.log(textValorAnyadido);
+//
+  console.log(document.getElementById('cantIng').value);
+//console.log(textValorAnyadido);
+//
+  console.log(document.getElementById('cantidad').value);
+  //})
+  jQuery.ajax({
+     url: '/getCalorias',
+     type: 'POST', 
+     contentType: false,
+     processData: false,    
+     data:formIngredientes,
+     success: function () {  
+      console.log("enviado");          
+     }
+ }).done(function(data) {
+            alert("success");
+            console.log(data);
+            updateCalorias(data['array']);
+           
+            //console.log(data);
+        })
+        .fail(function() {
+            
+            alert("error");
+            
+        });
+}
+  
+function addnIngredient() {
+  // $.get( "/food", function() {
+  //alert( "succes" );
+  var food=Object.values(JSON.parse(document.getElementById("imaginario").innerHTML));
+  console.log(food);
+//})
+  
+    $( "#IngredientesUp" ).autocomplete({
+      source: food
+    });
+  
+}
+
+var formData = new FormData();
+function compVision(image) {
+        console.log(image);
+        var params = {
+            // Request parameters
+            "visualFeatures": "Categories,Adult,Description",
+            "language": "es",
+        };
+      
+        jQuery.ajax({
+            url: "https://northeurope.api.cognitive.microsoft.com/vision/v2.0/analyze?" + $.param(params),
+            headers: {
+              'Origin':'http://lvh.me:5000',
+              'Access-Control-Allow-Credentials':'true',
+              'Content-Type': 'application/octet-stream',
+              "Access-Control-Allow-Origin":"*",
+              "Ocp-Apim-Subscription-Key":"a2a5709a43274d959acd5d4670862ef5"
+
+
+    },
+            type: "POST",
+            processData:false,
+            crossDomain: true,
+            dataType: 'json',
+            // Request body
+            data: image
+        })
+        .done(function(data) {
+            alert("success");
+            console.log(data);
+            document.getElementById("NameUp").value = data['categories'][0]['name'].toString();
+            document.getElementById("desc").value = data['description']['captions'][0]['text'].toString();
+            document.getElementById("TagsUp").value = data['description']['tags'].toString();
+            //console.log(data);
+        })
+        .fail(function() {
+           
+            alert("error");
+            
+        });
+    };
+
+function compress(e) {
+    const width = 400;
+    const height = 400;
+   const fileName = e.files[0].name;
+   console.log(fileName);
+    const reader = new FileReader();
+    reader.readAsDataURL(e.files[0]);
+    var image;
+    reader.onload = event => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+                const elem = document.createElement('canvas');
+                elem.width = width;
+                elem.height = height;
+                const ctx = elem.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                document.getElementById("upload-Preview").src = ctx.canvas.toDataURL();
+                
+                
+                ctx.canvas.toBlob((blob) => {
+                    const file = new File([blob], fileName, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+                    //console.log(file);
+                    var data = ctx.canvas.toDataURL("image/JPEG");
+                    var b= new Blob([blob], { type: 'contentType' });
+                    
+                    console.log("salgo compVision");
+                    console.log("anyado al form");
+                    formData.append('fileToUpload',file);
+                    var body =[];
+                    body.push(data);
+                    compVision(b);
+                    console.log("anyadido al form");
+                    
+                }, 'image/jpeg', 1);
+
+                
+            },
+            reader.onerror = error => console.log(error);
+    };
+     console.log(e.files[0].buffer);
+    
+}
+
+function submit(){
+  formData.append('Usuario',document.getElementById('Usuario').value);  
+  formData.append('NameUp',document.getElementById("NameUp").value);
+  formData.append('RecetaUp',document.getElementById("ObjectsUp").value);
+  formData.append('TagsUp',document.getElementById("TagsUp").value);
+  formData.append('Descripcion',document.getElementById("desc").value);
+  formData.append('ListaIngredientes',document.getElementById("IngCantList").value);
+  jQuery.ajax({
+     url: '/upload',
+     type: 'POST',     
+     contentType: false,
+     processData: false,
+     data: formData,
+     success: function () {  
+      console.log("enviado");          
+     }
+ });
+  
+}
+
+function getBarcodeCalories(){
+  var str1='/barcode/';
+  var str2=document.getElementById('BarcodeUp').value;
+  var str3=str2.concat('/');
+  var str4=document.getElementById('cantIng').value;
+  var str5=str1.concat(str3);
+  var barcode=str5.concat(str4);
+  jQuery.ajax({
+     url: barcode,
+     type: 'GET',     
+     success: function () { 
+       
+      console.log("enviado");          
+     }
+ }).done(function(data) {
+            alert("success");
+            console.log(data);
+            updateCalorias(data['calorias']);
+            document.getElementById("IngredientesUp").value=data['name'];
+            updateList();
+            var img = document.createElement("img");   
+            img.setAttribute("src",data['imagen']);   
+            document.getElementById("barcodeImage").appendChild(img);
+            //console.log(data);
+        })
+        .fail(function() {
+            
+            alert("error");
+            
+        });
+}
+
+
+</script>
+   </head>
+<body>
+
+  <section>
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <script src="/js/Navbar.js"></script>
+  </section>
+  <section>
+	<hr class="soften">
+	 <div class="well well-small">
+      <div class="contact-form">	
+	     <hr class="soften"/>	
+	       <div class="row-fluid">
+		      <div class="span8 relative">		
+		        <div class="form-group col-md-6">
+		          <input onchange="compress(this)" type="file" name="fileToUpload" id="fileToUpload" class="custom-file-input">
+              <img id="upload-Preview"/>    
+		        </div>		
+            <fieldset>
+              <div class="form-group col-md-12">           
+                <input id="NameUp" name="NameUp" type="text" placeholder="Nombre" class="form-control"/>           
+              </div>
+              <div class="form-group col-md-12">           
+                <input id="desc" type="text" name="DescripcionUp" placeholder="description" class="form-control"/>          
+              </div>
+              <div class="form-group col-md-12">
+                <input rows="3" id="TagsUp" placeholder="tags" name="TagsUp" class="form-control"/>           
+              </div>
+              <div class="form-group col-md-12">
+                <input rows="3" id="ObjectsUp"name="ObjectsUp" class="form-control"/>           
+              </div>     
+              <div class="span8 relative">         
+                <div class="form-group col-sm-7 auto-widget"> 
+                  <input id="IngredientesUp" name="IngredienteUp" type="text" placeholder="Ingredientes" class="form-control" onclick="addnIngredient()"/>          
+                </div>
+                                            
+                <div class="form-group col-sm-2">
+                  <div class="dropdown">
+                    <select class="form-control" id="cantidad">
+                      <option role="presentation">C</option>
+                      <option role="presentation">V</option>
+                      <option role="presentation">g</option>
+                      <option role="presentation">l</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group col-sm-2"> 
+                  <input id="cantIng" name="Cantidad" type="number" placeholder="Ingredientes" class="form-control" step=".01"/>        
+                </div>
+                 <div class="form-group col-sm-1"> 
+                  <button id="Bingred"  type="text" placeholder="Ingredientes" onclick="ingredientToList()" class="btn btn-group"> + </button>        
+                </div>
+
+              </div>
+              <div class="span8 relative">
+                <div class="form-group col-sm-7 auto-widget"> 
+                  <input id="BarcodeUp" name="IngredienteUp" type="text" placeholder="Ingredientes" class="form-control"/>          
+                </div>
+                <div class="form-group col-sm-4"> 
+                  <button id="Bingred"  type="text" placeholder="Ingredientes" onclick="openScann()" class="btn btn-group"> Código barras </button>        
+                </div>
+                <div id="barcodeImage" class="form-group col-sm-4"> 
+                 <!-- <img src= alt="picture">-->
+                </div>
+              </div>
+              <div class="span8 relative">
+                <div class="form-group col-sm-4"> 
+                  <ul class="list-group"  id="listaIngred">
+                  </ul>
+                </div>
+                <div class="form-group col-sm-2"> 
+                  <input id="cantCalorias" name="Calorias" type="number" placeholder="Ingredientes" class="form-control" step=".01" readonly/>       
+                </div>
+              <div  class="inpMedidas hide">
+                  <input id="IngCantList" name="ListaIngredientesUp" type="text" placeholder="Ingredientes"/>          
+              </div> 
+             
+		          <div class="form-group col-md-12">
+		            <button  onclick="submit()" id="submitForm" name="submit" class="btn btn-primary pull-right">Send</button>
+		          </div>
+                       
+              </div>
+              <div>
+                <div id="interactive" class="viewport"></div>
+               </div>
+            </fieldset>		
+
+		      </div>
+          <% if(array){%>
+           <div id="imaginario" class="hide"><%= JSON.stringify(array)%></div>
+           <% }%>
+	
+</div>
+<!-- 
+Clients 
+-->
+
+
+<!--
+Footer
+-->
+
+</div><!-- /container -->
+</section>
+<div>
+<a href="#" class="gotop"><i class="icon-double-angle-up"></i></a>
+    <!-- Placed at the end of the document so the pages load faster -->  
+   
+  </body>
+</html>

@@ -46,11 +46,14 @@ const conn = mongoose.createConnection(mongoURI,function(error) {
 
 
 var recetaSchema =require("./models/Receta");
+var restauranteSchema=require("./models/Restaurante");
 
 
 
 var recS=recetaSchema.plugin(mongoosastic);
+var resS=restauranteSchema.plugin(mongoosastic);
 var Mreceta = conn.model('recipe', recS),stream = Mreceta.synchronize({}, {saveOnSynchronize: true}),count = 0;
+var Mrestaurante = conn.model('restaurant', resS),stream = Mrestaurante.synchronize({}, {saveOnSynchronize: true}),count = 0;
 
 
 
@@ -353,6 +356,34 @@ app.post('/upload',upload.single('fileToUpload'), (req, res) => {
   
 });
 
+app.post('/uploadRestaurante',upload.single('fileToUpload'), (req, res) => {
+  var Mrestaurante = conn.model('restaurant', resS),stream = Mrestaurante.synchronize({}, {saveOnSynchronize: true}),count = 0;
+  
+  console.log("Server recibio restaurante");  
+  //var collection = conn.db.collection('recipe');
+  Mrestaurante.insertMany([{"Image":req.file.buffer,
+            "Usuario": req.body.Usuario,
+             "NombrePlato": req.body.Nombre,//string
+             "Descripcion": req.body.Descripcion,
+             "Tags": req.body.Tags,
+             "Ciudad": req.body.Ciudad,
+             "NombreRestaurante": req.body.Restaurante,
+            "Precio" : req.body.Precio,
+            "Coordenada" : req.body.Coordenada,
+            "Likes" : []
+           }], function (err) {
+      if (err){ 
+          console.log(err);
+      } else {
+        console.log("Multiple documents inserted to Collection");
+        res.redirect('/');
+      }
+    });  
+  
+  
+});
+
+
 function getCaloriasPerCant(energy,cantidad){
   return parseFloat(energy)*parseFloat(cantidad)/100.0;
 
@@ -395,24 +426,7 @@ app.get('/food', function (req, res) {
   });
 
 
-async function search(){
-   const response = await client.search({
-  index: 'twitter',
-  type: 'tweets',
-  body: {
-    query: {
-      match: {
-        body: 'elasticsearch'
-      }
-    }
-  }
-})
- 
-for (const tweet of response.hits.hits) {
-  console.log('tweet:', tweet);
-}
 
-}
 
 app.get('/', (req, res) => {
   //migracion();
@@ -446,6 +460,15 @@ app.get('/', (req, res) => {
     
    
 });
+
+app.get('/inicio', (req, res) => {
+  //migracion();
+  //search();
+  
+    res.render('inicio',{});
+    
+   
+});
 app.get('/restaurante', (req, res) => {
       res.render('Restaurant',{});
     
@@ -467,6 +490,58 @@ app.get('/index', (req, res) => {
   });
    
   });
+
+app.get('/VRestaurantes', (req, res) => {
+  var collection = conn.db.collection('restaurants');
+  collection.find().toArray((err, items) => {
+    console.log(items.length);
+    photos=items;
+     if (items.length === 0) {
+      res.render('indexRestaurante', { items: false });
+    } else {
+      console.log(items[1]);
+      res.render('indexRestaurante', { items: items });
+  }
+  });
+   
+  });
+
+app.post('/addLikeRestaurant',upload.single(), (req, res) => {
+  console.log(req.body.Usuario);
+  var collection = conn.db.collection('restaurants');
+  collection.find({_id:mongoose.Types.ObjectId(req.body.RestauranteId)},{ projection: {Likes:1}}
+).toArray( function (err, array) {
+            console.log(array);
+            if (err) throw err;
+            if (array[0]['Likes'].length>0){
+              if(array[0]['Likes'].includes(req.body.Usuario)){
+                var filtered = array[0]['Likes'].filter(function(value, index, arr){
+
+                  return value!=req.body.Usuario;
+
+                });
+                var collection = conn.db.collection('restaurants');
+                collection.updateOne({_id: mongoose.Types.ObjectId(req.body.RestauranteId)},{$set: { "Likes" : filtered}});
+                res.json({cantLikes: filtered.length }); 
+          
+              }else{
+                var collection = conn.db.collection('restaurants');
+                array[0]['Likes'].push(req.body.Usuario);
+                collection.update({_id: mongoose.Types.ObjectId((req.body.RestauranteId))},{$set: { "Likes" : array[0]['Likes']}});
+                res.json({cantLikes: array[0]['Likes'].length });
+            
+          }}else{
+            var collection = conn.db.collection('restaurants');
+            var array=[];
+            array.push(req.body.Usuario);
+            console.log(req.body.RestauranteId);
+            collection.updateOne({_id: mongoose.Types.ObjectId(req.body.RestauranteId)},{$set: { "Likes" : array},$currentDate: { lastModified: true }});
+            console.log(array);
+            console.log(req.body.Usuario);
+          }})});  
+ 
+  
+
           
 app.post('/addLike',upload.single(), (req, res) => {
   console.log(req.body.Usuario);

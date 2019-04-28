@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Eat\&Share</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+	  <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <!-- Bootstrap styles -->
+    <!--<link href="assets/css/bootstrap.css" rel="stylesheet"/>-->
+    <!-- Customize styles -->
+    <!--<link href="style.css" rel="stylesheet"/>-->
+    <!-- font awesome styles -->
+	<!--<link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">-->
+	<!--<script src="http://code.jquery.com/jquery-1.11.1.min.js">-->  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>    
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/prettyPhoto.css" rel="stylesheet">
+    <link href="css/price-range.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+	  <link href="css/main.css" rel="stylesheet">
+	  <link href="css/responsive.css" rel="stylesheet">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+    <script src='https://cdn.rawgit.com/pguso/jquery-plugin-circliful/master/js/jquery.circliful.min.js'></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+   integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+   crossorigin=""/>
+   <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+   integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+   crossorigin=""></script>
+   
+	
+	<!-- Favicons -->
+    <link rel="shortcut icon" href="assets/ico/favicon.ico">
+    <head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+<title>client</title>
+
+<script type="text/javascript">
+ 
+
+$(document).ready(function(){
+  var mymap=L.map('mapid');
+  mymap.on('click', onMapClick);
+  mymap.on('locationfound', onLocationFound);
+  mymap.locate({setView: true});
+  //var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox.streets',
+    accessToken: 'pk.eyJ1IjoibWFpZGVyaWJhcnJhIiwiYSI6ImNqdXVjaGJneDBnMWs0ZG9hMWo4dGhqYWkifQ.K1kD1QAW-bRCyxYUPatdJQ'
+}).addTo(mymap);
+  var marker;
+ 
+ 
+    function onMapClick(e) {
+      marker.setLatLng(e.latlng);
+      document.getElementById("coordenada").value=e.latlng;
+    alert("You clicked the map at " + e.latlng);
+}
+ function onLocationFound(e) {
+    marker = L.marker(e.latlng).addTo(mymap);
+    document.getElementById("coordenada").value=e.latlng;
+     marker.bindPopup("<b>Estoy aquí</b>").openPopup();
+    alert("You clicked the map at " + e.latlng);
+}
+});
+
+
+
+var formIngredientes = new FormData();
+  
+
+var formData = new FormData();
+function compVision(image) {
+        console.log(image);
+        var params = {
+            // Request parameters
+            "visualFeatures": "Categories,Adult,Description",
+            "language": "es",
+        };
+      
+        jQuery.ajax({
+            url: "https://northeurope.api.cognitive.microsoft.com/vision/v2.0/analyze?" + $.param(params),
+            headers: {
+              'Origin':'http://lvh.me:5000',
+              'Access-Control-Allow-Credentials':'true',
+              'Content-Type': 'application/octet-stream',
+              "Access-Control-Allow-Origin":"*",
+              "Ocp-Apim-Subscription-Key":"a2a5709a43274d959acd5d4670862ef5"
+
+
+    },
+            type: "POST",
+            processData:false,
+            crossDomain: true,
+            dataType: 'json',
+            // Request body
+            data: image
+        })
+        .done(function(data) {
+            alert("success");
+            console.log(data);
+            document.getElementById("NameUp").value = data['categories'][0]['name'].toString();
+            document.getElementById("desc").value = data['description']['captions'][0]['text'].toString();
+            document.getElementById("TagsUp").value = data['description']['tags'].toString();
+            //console.log(data);
+        })
+        .fail(function() {
+           
+            alert("error");
+            
+        });
+    };
+
+
+
+function compress(e) {
+    const width = 400;
+    const height = 400;
+   const fileName = e.files[0].name;
+   console.log(fileName);
+    const reader = new FileReader();
+    reader.readAsDataURL(e.files[0]);
+    var image;
+    reader.onload = event => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+                const elem = document.createElement('canvas');
+                elem.width = width;
+                elem.height = height;
+                const ctx = elem.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                document.getElementById("upload-Preview").src = ctx.canvas.toDataURL();
+                
+                
+                ctx.canvas.toBlob((blob) => {
+                    const file = new File([blob], fileName, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+                    //console.log(file);
+                    var data = ctx.canvas.toDataURL("image/JPEG");
+                    var b= new Blob([blob], { type: 'contentType' });
+                    
+                    console.log("salgo compVision");
+                    console.log("anyado al form");
+                    formData.append('fileToUpload',file);
+                    var body =[];
+                    body.push(data);
+                    compVision(b);
+                    console.log("anyadido al form");
+                    
+                }, 'image/jpeg', 1);
+
+                
+            },
+            reader.onerror = error => console.log(error);
+    };
+     console.log(e.files[0].buffer);
+    
+}
+
+function submit(){
+  formData.append('Usuario',document.getElementById('Usuario').value);  
+  formData.append('Nombre',document.getElementById("NameUp").value);
+  formData.append('Ciudad',document.getElementById("ciudadUp").value);
+  formData.append('Tags',document.getElementById("TagsUp").value);
+  formData.append('Descripcion',document.getElementById("desc").value);
+  formData.append('Restaurante',document.getElementById("RestaurantesUp").value);
+  formData.append('Precio',document.getElementById("precio").value);
+  formData.append('Coordenada',document.getElementById("coordenada").value);
+  jQuery.ajax({
+     url: '/uploadRestaurante',
+     type: 'POST',     
+     contentType: false,
+     processData: false,
+     data: formData,
+     success: function () {  
+      console.log("enviado");          
+     }
+ });
+  
+}
+</script>
+   </head>
+<body>
+
+  <section>
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <script src="/js/Navbar.js"></script>
+  </section>
+  <section>
+	<hr class="soften">
+	 <div class="well well-small">
+      <div class="contact-form">	
+	     <hr class="soften"/>	
+	       <div class="row-fluid">
+		      <div class="span8 relative">		
+		        <div class="form-group col-md-6">
+		          <input onchange="compress(this)" type="file" name="fileToUpload" id="fileToUpload" class="custom-file-input">
+              <img id="upload-Preview"/>    
+		        </div>		
+            <fieldset>
+              <div class="form-group col-md-12">           
+                <input id="NameUp" name="NameUp" type="text" placeholder="Nombre plato" class="form-control"/>           
+              </div>
+              <div class="form-group col-md-12">           
+                <input id="desc" type="text" name="DescripcionUp" placeholder="Description" class="form-control"/>          
+              </div>
+              <div class="form-group col-md-12">
+                <input rows="3" id="TagsUp" placeholder="tags" name="TagsUp" class="form-control"/>           
+              </div>
+              <div class="form-group col-md-12">
+                <input rows="3" id="ciudadUp"name="CiudadUp" class="form-control"/>           
+              </div>     
+              <div class="span8 relative">         
+                <div class="form-group col-sm-7 auto-widget"> 
+                  <input id="RestaurantesUp" name="RestauranteUp" type="text" placeholder="Restaurante" class="form-control"/>          
+                </div>
+                <div class="form-group col-sm-2"> 
+                  <input id="precio" name="PrecioUp" type="number" placeholder="Precio" class="form-control" step=".01"/>        
+                </div>
+                 
+              </div>
+              <div class="span8 relative">
+                
+              <div  class="inpMedidas hide">
+                  <input id="coordenada" name="CoordenadaUp" type="text"/>          
+              </div> 
+             
+		          <div class="form-group col-md-12">
+		            <button  onclick="submit()" id="submitForm" name="submit" class="btn btn-primary pull-right">Send</button>
+		          </div>            
+                       
+              </div>
+               <div class="span8 relative">
+               <div class=" col-sm-12" id="mapid"></div>
+               </div>
+            </fieldset>		
+		      </div>
+          
+</div>
+</div><!-- /container -->
+</section>
+<div>
+<a href="#" class="gotop"><i class="icon-double-angle-up"></i></a>
+    <!-- Placed at the end of the document so the pages load faster -->  
+   
+  </body>
+</html>
