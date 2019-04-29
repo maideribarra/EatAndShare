@@ -1,0 +1,51 @@
+[
+    {
+        "name": "statickidz/bedca-api",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/statickidz/bedca-api.git",
+            "reference": "7223b653d0ddf3a9ee6b30f9b648f9b25fd194b7"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/statickidz/bedca-api/zipball/7223b653d0ddf3a9ee6b30f9b648f9b25fd194b7",
+            "reference": "7223b653d0ddf3a9ee6b30f9b648f9b25fd194b7",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.5.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~4.0"
+        },
+        "time": "2016-03-11T09:37:00+00:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-0": {
+                "StaticKidz\\BedcaAPI\\": "src/"
+            },
+            "psr-4": {
+                "StaticKidz\\BedcaAPI\\": "src/StaticKidz/BedcaAPI/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "StaticKidz",
+                "email": "statickidz@gmail.com"
+            }
+        ],
+        "description": "API wrapper for Spanish Food Composition Database (BEDCA)",
+        "keywords": [
+            "api",
+            "bedca",
+            "food"
+        ]
+    }
+]

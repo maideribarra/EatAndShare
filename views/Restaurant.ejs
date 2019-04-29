@@ -66,12 +66,18 @@ $(document).ready(function(){
  
     function onMapClick(e) {
       marker.setLatLng(e.latlng);
-      document.getElementById("coordenada").value=e.latlng;
-    alert("You clicked the map at " + e.latlng);
+      var lati=e.latlng.lat;
+       var latilong=lati.toString().concat("%");
+      var str=latilong.concat(e.latlng.lng);
+      document.getElementById("coordenada").value=str;
+    alert("You clicked the map at " + str);
 }
  function onLocationFound(e) {
     marker = L.marker(e.latlng).addTo(mymap);
-    document.getElementById("coordenada").value=e.latlng;
+     var lati=e.latlng.lat;
+       var latilong=lati.toString().concat("%");
+      var str=latilong.concat(e.latlng.lng);
+      document.getElementById("coordenada").value=str;
      marker.bindPopup("<b>Estoy aquí</b>").openPopup();
     alert("You clicked the map at " + e.latlng);
 }

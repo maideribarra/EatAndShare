@@ -13,7 +13,7 @@
     <link href="/css/price-range.css" rel="stylesheet">
     <link href="/css/animate.css" rel="stylesheet">
     <link href="/css/main.css" rel="stylesheet">
-     <link href="/css/heart.css" rel="stylesheet">
+    <link href="/css/heart.css" rel="stylesheet">
     <link href="/css/responsive.css" rel="stylesheet">
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/ico/apple-touch-icon-114-precomposed.png">
@@ -24,8 +24,14 @@
     <link rel="stylesheet" href="/resources/demos/style.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
-  <script src="/assets/js/bootstrap.min.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+   integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+   crossorigin=""/>
+   <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+   integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+   crossorigin=""></script>
+   
  
   
   <!-- Favicons -->
@@ -38,11 +44,77 @@
  
 
 $(document).ready(function(){
-  
-    
+  var mymap=L.map('mapid');
+  mymap.on('click', onMapClick);
+  mymap.on('locationfound', onLocationFound);
+  mymap.locate({setView: true});
+  //var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox.streets',
+    accessToken: 'pk.eyJ1IjoibWFpZGVyaWJhcnJhIiwiYSI6ImNqdXVjaGJneDBnMWs0ZG9hMWo4dGhqYWkifQ.K1kD1QAW-bRCyxYUPatdJQ'
+}).addTo(mymap);
+  var marker;
+ 
+ 
+    function onMapClick(e) {
+      marker.setLatLng(e.latlng);
+      var lati=e.latlng.lat;
+       var latilong=lati.toString().concat("%");
+      var str=latilong.concat(e.latlng.lng.toString());
+      document.getElementById("coordenada").value=str;
+    alert("You clicked the map at " + str);
+}
+ function onLocationFound(e) {    
+    marker = L.marker(e.latlng).addTo(mymap);
+    document.getElementById("coordenada").value=e.latlng;
+     marker.bindPopup("<b>Estoy aquí</b>").openPopup();
+     var coor=document.getElementById("coordenada").value.split("%");
+    var url='/restaurantesVecinos/';
+    var str1=url.concat(e.latlng.lat);
+    var str2=str1.concat('/');
+    var str3=str2.concat(e.latlng.lng);
     
 
-  });
+    alert("You clicked the map at " + e.latlng);
+    jQuery.ajax({
+     url: str3,
+     type: 'GET',     
+     success: function () {  
+      console.log("enviado");          
+     }
+ }).done(function(data) {
+          console.log("onLocation");
+          addToMap(data);
+           
+            //alert("success");
+            //console.log(data);
+            //window.location.reload(); 
+                     
+        })
+        .fail(function() {
+            
+            alert("error");
+            
+        });
+      }
+  
+  function addToMap(array){
+    console.log(array);
+    var i=0;
+    for(i;i<array['items'].length;i++){
+      var latlng = L.latLng(array['items'][i]['Coordenada'][0],array['items'][i]['Coordenada'][1]);
+      console.log(latlng);
+      var marker = L.marker(latlng).addTo(mymap);
+       marker.bindPopup(array['items'][i]['NombreRestaurante']).openPopup();
+
+
+    }
+  }
+
+});
+
 function addheart(obj){
   obj.setAttribute("class", "heart");
   setTimeout(function(){
@@ -92,6 +164,11 @@ function addLike(id){
     <script src="https://apis.google.com/js/platform.js"></script>
     <script src="/js/Navbar.js"></script>
   </section>
+      <aside>
+        <div class="span8 relative">
+          <div class=" col-sm-12" id="mapid"></div>
+        </div>
+      </aside>
   <section>
     <div class="container">
       <div class="row">
@@ -101,16 +178,18 @@ function addLike(id){
               
           <div class="category-tab"><!--category-tab-->
               
-            <!--<div class="recommended_items"><!--recommended_items-->
-              <h2 class="title text-center">Recetas</h2>
+            <!--<div class="recommended_items"><recommended_items-->
+              <h2 class="title text-center">Restaurantes</h2>
               
               <!--<div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">-->
                 <div class="carousel-inner">
-                  <div class="item active"> 
+                  
+                  
+                    
                   <% if(items){ %>          
                     <% items.forEach(function(item) { %>
-                    <div class="col-sm-4">
-                     
+                  
+                      <div class="col-sm-4">
                       <div class="product-image-wrapper">
                         <div class="single-products">
                           
@@ -147,13 +226,19 @@ function addLike(id){
                                 </div>
                                 <a href="#" class="btn btn-default add-to-cart" onclick="addLike('<%=item._id%>')" ><i class="fa fa-shopping-cart"></i><%=item.Likes.length%></a>
                              </div>
+                             <div  class="inpMedidas hide">
+                              <input id="coordenada" name="CoordenadaUp" type="text"/>          
+                            </div>
 
                           </div>
                           
                           
-                        </div>
+                        
                       </div>
-                    </div>
+                      </div>
+
+
+                    
                   </div>
               <% } %>
              <% })} %>                           
@@ -165,7 +250,7 @@ function addLike(id){
                   <i class="fa fa-angle-right"></i>
                   </a>      -->
              <!-- </div>-->
-            <!--</div><!--/recommended_items-->
+            <!--</div></recommended_items-->
             
           </div>
         </div>

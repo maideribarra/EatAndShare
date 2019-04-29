@@ -29,6 +29,8 @@ var resizeImage = require('resize-image');
 var mongoosastic=require("mongoosastic");
 // Mongo URI
 const mongoURI = 'mongodb://localhost:27017/EASbd';
+//var mongoURI = 'mongodb+srv://user:1234@db-0clnu.mongodb.net/1234?retryWrites=true';
+
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
   host: 'localhost:9200',
@@ -230,16 +232,7 @@ async function getResultSuggestion(value,i){
    var resultadoSugesstion=[];
   // var resultado=[];
       
-      arraySS=searchSuggestion(value[i]);
-       
-       
-
-      
-
-  
-    
-
-    
+      arraySS=searchSuggestion(value[i]);    
 
 }
 app.get('/search/:text?',async function (requ, re) {
@@ -358,7 +351,8 @@ app.post('/upload',upload.single('fileToUpload'), (req, res) => {
 
 app.post('/uploadRestaurante',upload.single('fileToUpload'), (req, res) => {
   var Mrestaurante = conn.model('restaurant', resS),stream = Mrestaurante.synchronize({}, {saveOnSynchronize: true}),count = 0;
-  
+  var coorStr=req.body.Coordenada.split("%");
+
   console.log("Server recibio restaurante");  
   //var collection = conn.db.collection('recipe');
   Mrestaurante.insertMany([{"Image":req.file.buffer,
@@ -369,7 +363,7 @@ app.post('/uploadRestaurante',upload.single('fileToUpload'), (req, res) => {
              "Ciudad": req.body.Ciudad,
              "NombreRestaurante": req.body.Restaurante,
             "Precio" : req.body.Precio,
-            "Coordenada" : req.body.Coordenada,
+            "Coordenada" : coorStr,
             "Likes" : []
            }], function (err) {
       if (err){ 
@@ -490,6 +484,46 @@ app.get('/index', (req, res) => {
   });
    
   });
+
+app.get('/restaurantesVecinos/:x?/:y?', (req, res) =>{
+  var x=req.params['x'];
+  var y=req.params['y'];
+  console.log(x);
+  console.log(y);
+  
+   var collection = conn.db.collection('restaurants');
+   var arrCoor=[];
+    var METERS_PER_MILE = 1609.34;
+    console.log("vecinos");
+    //collection.find({ $nearSphere:[ x,y ] , $maxDistance: 5 * METERS_PER_MILE },{ projection: {_id:0, Coordenada:1}}).toArray((err, items) => {
+      //console.log(items);
+ 
+  collection.find({},{ projection: {Coordenada:1,NombreRestaurante:1,_id:0}}).toArray((err, items) => {
+    var arrCoord=[];
+    var i=0;
+    for (i;i<items.length;i++){
+      var coor=items[i]['Coordenada'];
+      var r=(x-coor[0])^2+(y-coor[1])^2;
+      console.log(r);
+      if (r<1000){
+        arrCoor.push(items[i]);
+      }
+
+    }
+    console.log(items.length);
+    
+     if (arrCoor.length === 0) {
+      res.json({ items: false });
+    } else {
+      console.log(arrCoor);
+      res.json({ items: items });
+  }
+  });
+});
+   
+
+
+
 
 app.get('/VRestaurantes', (req, res) => {
   var collection = conn.db.collection('restaurants');
