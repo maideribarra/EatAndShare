@@ -38,6 +38,7 @@ document.write("<header id=\"header\">");
   console.log('Name: ' + profile.getName());
   console.log('Image URL: ' + profile.getImageUrl());
   console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+  location.href="http://localhost:5000/index";
 }
 
   

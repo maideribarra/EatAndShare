@@ -168,11 +168,8 @@ async function concatSugesstions(body){
     //console.log(arrayResultado);
     //console.log("devuelvo resultado");
     return arrayResultado;
-     //do something
-    
-    
-        
-      return arrayResultado;
+     //do something        
+      //return arrayResultado;
 }
 var flag=false;
 var arraySugesstions=[];
@@ -228,13 +225,13 @@ function takeResponseSugesstions(sugesstion,respuesta){
       }
       return arrayResultado;
 }
-async function getResultSuggestion(value,i){
-   var resultadoSugesstion=[];
+//async function getResultSuggestion(value,i){
+  // var resultadoSugesstion=[];
   // var resultado=[];
       
-      arraySS=searchSuggestion(value[i]);    
+    //  arraySS=searchSuggestion(value[i]);    
 
-}
+//}
 app.get('/search/:text?',async function (requ, re) {
   var phrase=requ.params['text'];
   flag=false;
@@ -315,6 +312,7 @@ reque.end();
     
 
 app.post('/upload',upload.single('fileToUpload'), (req, res) => {
+  console.log(getSugetions("pizza"));
   var Mreceta = conn.model('recipe', recS),stream = Mreceta.synchronize({}, {saveOnSynchronize: true}),count = 0;
   console.log("entro");  
   var jsonArrayIngredientes=[];

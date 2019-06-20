@@ -178,7 +178,7 @@ function compVision(image) {
               'Access-Control-Allow-Credentials':'true',
               'Content-Type': 'application/octet-stream',
               "Access-Control-Allow-Origin":"*",
-              "Ocp-Apim-Subscription-Key":"a2a5709a43274d959acd5d4670862ef5"
+              "Ocp-Apim-Subscription-Key":"ba384d0daf334364b2018a7b0f272a73"
 
 
     },
@@ -192,10 +192,13 @@ function compVision(image) {
         .done(function(data) {
             alert("success");
             console.log(data);
-            document.getElementById("NameUp").value = data['categories'][0]['name'].toString();
-            document.getElementById("desc").value = data['description']['captions'][0]['text'].toString();
+			if(data['categories'].length>0){
+				document.getElementById("NameUp").value = data['categories'][0]['name'].toString();
+            }
+			document.getElementById("desc").value = data['description']['captions'][0]['text'].toString();
             document.getElementById("TagsUp").value = data['description']['tags'].toString();
             //console.log(data);
+			
         })
         .fail(function() {
            
