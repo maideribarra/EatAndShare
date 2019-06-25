@@ -82,12 +82,20 @@ function openScann(){
 }, function() {
   Quagga.start();
 });
-
+var detect=0;
 Quagga.onDetected(function(result) {
   var code = result.codeResult.code;
   document.getElementById("BarcodeUp").value = code;
   console.log(code);
-  getBarcodeCalories();
+  console.log(detect);
+  if(detect==0){
+	detect=1;
+	getBarcodeCalories();
+	Quagga.stop();
+	
+	
+  }
+  
 });
 
 
@@ -255,6 +263,7 @@ function compress(e) {
 }
 
 function submit(){
+  alert("send");
   formData.append('Usuario',document.getElementById('Usuario').value);  
   formData.append('NameUp',document.getElementById("NameUp").value);
   formData.append('RecetaUp',document.getElementById("ObjectsUp").value);
@@ -268,7 +277,8 @@ function submit(){
      processData: false,
      data: formData,
      success: function () {  
-      console.log("enviado");          
+      console.log("enviado"); 
+	  window.location="http://localhost:5000/";
      }
  });
   
@@ -285,10 +295,11 @@ function getBarcodeCalories(){
      url: barcode,
      type: 'GET',     
      success: function () { 
-       
+        detect=0;
       console.log("enviado");          
      }
  }).done(function(data) {
+           
             alert("success");
             console.log(data);
             updateCalorias(data['calorias']);
@@ -297,10 +308,11 @@ function getBarcodeCalories(){
             var img = document.createElement("img");   
             img.setAttribute("src",data['imagen']);   
             document.getElementById("barcodeImage").appendChild(img);
+			detect=0;
             //console.log(data);
         })
         .fail(function() {
-            
+           detect=0; 
             alert("error");
             
         });

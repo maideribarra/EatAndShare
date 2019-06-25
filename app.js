@@ -30,7 +30,6 @@ var mongoosastic=require("mongoosastic");
 // Mongo URI
 const mongoURI = 'mongodb://localhost:27017/EASbd';
 //var mongoURI = 'mongodb+srv://user:1234@db-0clnu.mongodb.net/1234?retryWrites=true';
-
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
   host: 'localhost:9200',
@@ -265,6 +264,20 @@ resultado=[];
   
 });
 
+function getProductName(jsonObj){
+	var arr=Object.keys(jsonObj['product']);
+	var pat='product_name';
+	var i;
+	for (i = 0; i < arr.length; i++) {
+		console.log(arr[i]);
+		if(arr[i].search(pat)!=-1){
+			console.log(arr[i]);
+			return arr[i];
+		}
+	};
+	
+}
+
 app.get('/barcode/:id?/:cantidad?', function (requ, re) {
   var code = requ.params['id'];
   console.log("code:");
@@ -291,11 +304,13 @@ const reque = http.request(options, (resp) => {
   resp.on('end', () => {
     console.log('No more data in response.');
     var jsingrediente=JSON.parse(body);
-    var ingrediente={name: jsingrediente['product']['ingredients_text_es'],calorias :jsingrediente['product']['nutriments']['energy_value'],medida:jsingrediente['product']['nutriments']['energy_unit'],image:jsingrediente['product']['image_front_url']};
+	var nombre=getProductName(jsingrediente);
+	console.log(nombre);
+    var ingrediente={name: jsingrediente['product'][nombre],calorias :jsingrediente['product']['nutriments']['energy_value'],medida:jsingrediente['product']['nutriments']['energy_unit'],image:jsingrediente['product']['image_nutrition_small_url']};
     console.log(ingrediente);
     var kcal  =  ingrediente['calorias'];
     var kcalTotal =  getCaloriasPerCant(kcal,requ.params['cantidad']);
-    re.json({calorias: kcalTotal,imagen:ingrediente['image'],name:jsingrediente['product']['ingredients_text_es']});
+    re.json({calorias: kcalTotal,imagen:ingrediente['image'],name:jsingrediente['product'][nombre]});
   });
 });
 
@@ -312,7 +327,7 @@ reque.end();
     
 
 app.post('/upload',upload.single('fileToUpload'), (req, res) => {
-  console.log(getSugetions("pizza"));
+  console.log("prueba rapidminer");
   var Mreceta = conn.model('recipe', recS),stream = Mreceta.synchronize({}, {saveOnSynchronize: true}),count = 0;
   console.log("entro");  
   var jsonArrayIngredientes=[];
@@ -421,6 +436,36 @@ app.get('/food', function (req, res) {
 
 
 app.get('/', (req, res) => {
+  const { spawn } = require('child_process');
+  var nwDir = path.dirname(process.execPath);
+  var process = spawn('python',["./anyadirLikes.py"] ); 
+  child.stdout.on('data', (data) => {
+  console.log(data.toString());
+	});
+
+  child.stderr.on('data', (data) => {
+  console.log(data.toString());
+  });
+
+  child.on('exit', (code) => {
+  console.log(`Child exited with code ${code}`);
+	const { spawn } = require('child_process');
+	var nwDir = path.dirname(process.execPath);
+	const child = spawn('cmd.exe', ['/c', 'rapidminer-batch.bat', '-f', nwDir+'\\..\\..\\recomendador\\recomendatios.rmp']);
+	child.stdout.on('data', (data) => {
+	console.log(data.toString());
+	});
+
+	child.stderr.on('data', (data) => {
+	console.log(data.toString());
+	});
+
+	child.on('exit', (code) => {
+	console.log(`Child exited with code ${code}`);
+	});
+
+  });
+  
   //migracion();
   //search();
   var collection = conn.db.collection('recipes');

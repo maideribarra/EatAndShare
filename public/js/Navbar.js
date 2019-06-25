@@ -170,7 +170,7 @@
 
           }
  }).done(function(data) {
-             
+			document.getElementById("imgContainer").innerHTML=data;
                      
         })
         .fail(function() {
