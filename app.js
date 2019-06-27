@@ -433,21 +433,166 @@ app.get('/food', function (req, res) {
   });
 
 
+async function GetCluster(usuario){
+	var fileContent;
+	var resultado =-1;
+    const csvCluster= new Promise(function(resolve) {
+        fileContent = fs.readFileSync('C:\\recomendador\\cluster.csv', {encoding: 'utf8'});
+        resolve(fileContent);
+    });
+	return csvCluster.then(function(value) {
+        var rows = value.split("\r\n");
+		var i=0;
+		for (var i = 0; i < rows.length; i++) {
+			var val=rows[i].split(";");
+			var str1="\"";
+			var str=str1.concat(usuario);
+			var str2=str.concat(str1);
+			if(str2===(val[val.length-3])){
+				console.log(val[val.length-1]);
+				resultado=val[val.length-1];
+				return resultado;
+			}
+		}
+		
+	});
+}
+	
+async function GetCentroids(cluster){
+	var xlsx = require('node-xlsx');
+	const obj = new Promise(function(resolve) {
+		xlsx.parse('C:\\recomendador\\centroides.xlsx');
+	});
+	return obj.then(function(value) {
+	var i;
+	var lista=[];
+	for (var i=0; i< obj[0]['data'].length;i++){		
+		var row=obj[0]['data'][i];
+		console.log(row[row.length-1]);
+		if(cluster===row[row.length-1]){
+			
+			for (var j=0; j< row.length;j++){
+				if(row[j]>0.4){
+					console.log("entro");
+					console.log(obj[0]['data'][0][j]);
+					lista.push(obj[0]['data'][0][j]);
+				}
+				
+			}
+			console.log(lista);
+			return lista;
+		}
+	}
+	});
+}
 
+async function getPlatosRecomendados(array,res){
+	arrId=[];
+	for(var i=0;i<array.length;i++){
+		arrId.push(mongoose.Types.ObjectId(array[i]));
+		
+	}
+	var colRecipes = conn.db.collection('recipes');
+	var colRestaurants = conn.db.collection('restaurants');
+	colRecipes.find( { _id: { $in: arrId } }).toArray((err, recetas) => {
+		colRestaurants.find( { _id: { $in: arrId } }).toArray((err, restaurantes) => {		
+    console.log(recetas);
+	 console.log(restaurantes);
+    recetas.concat(restaurantes);
+     if (recetas.length === 0) {
+      res.render('index', { items: false });
+	  return 0;
+    } else {
+      console.log(recetas);
+      res.render('index', { items: recetas });
+	  return 0;
+  }
+  });
+    console.log(recetas.length);
+     if (recetas.length === 0) {
+      res.render('index', { items: false });
+	  return 0;
+    } else {
+      console.log(recetas);
+      res.render('index', { items: recetas });
+	  return 0;
+  }
+  });
+	
+}
 
-app.get('/', (req, res) => {
-  const { spawn } = require('child_process');
+async function sendData(usuario,res){
+	var numCluster= GetCluster(usuario);
+	setTimeout(function(){
+		console.log("num clusters");
+		console.log(numCluster);
+
+		const centroids=GetCentroids(numCluster);
+		setTimeout(function(){
+			centroids.then(function(value) {
+			console.log("centroides");
+			console.log(centroids);
+			getPlatosRecomendados(value,res);
+			});
+			 }, 15000);
+		
+  }, 10000);
+  
+}
+
+app.get('/recomendar/:usuario?', (req, res) => {
+  var usuario=req.params['usuario'];  
+  
   var nwDir = path.dirname(process.execPath);
-  var process = spawn('python',["./anyadirLikes.py"] ); 
-  child.stdout.on('data', (data) => {
+  const { spawn } = require('child_process');
+  var processpy = spawn('python',["-u",nwDir+"\\..\\..\\recomendador\\anyadirLikes.py"] ); 
+  processpy.stdout.on('data', (data) => {
   console.log(data.toString());
 	});
 
-  child.stderr.on('data', (data) => {
+  processpy.stderr.on('data', (data) => {
   console.log(data.toString());
   });
 
-  child.on('exit', (code) => {
+  processpy.on('exit', (code) => {
+  console.log(`Child exited with code ${code}`);
+	const child = spawn('cmd.exe', ['/c', 'rapidminer-batch.bat', '-f', nwDir+'\\..\\..\\recomendador\\recomendatios.rmp']);
+	child.stdout.on('data', (data) => {
+	console.log(data.toString());
+	});
+
+	child.stderr.on('data', (data) => {
+	console.log(data.toString());
+	});
+
+	child.on('exit', (code) => {
+	console.log(`Child exited with code ${code}`);
+	sendData(usuario,res);
+	
+	});
+
+  });
+  setTimeout(function(){ }, 10000);
+  
+  
+   
+});
+
+
+
+app.get('/', (req, res) => {
+  var nwDir = path.dirname(process.execPath);
+  const { spawn } = require('child_process');
+  var processpy = spawn('python',["-u",nwDir+"\\..\\..\\recomendador\\anyadirLikes.py"] ); 
+  processpy.stdout.on('data', (data) => {
+  console.log(data.toString());
+	});
+
+  processpy.stderr.on('data', (data) => {
+  console.log(data.toString());
+  });
+
+  processpy.on('exit', (code) => {
   console.log(`Child exited with code ${code}`);
 	const { spawn } = require('child_process');
 	var nwDir = path.dirname(process.execPath);
